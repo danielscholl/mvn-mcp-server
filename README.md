@@ -2,47 +2,23 @@
 
 ## Initial Execute Instruction Set
 
-> Warning: This will run claude in YOLO mode with no interactions.
-
 ```bash
-# Define the Name of the MCP Server we are creating.
-MCP_SERVER_NAME="reverse-mcp-server"
+# Enter interactive mode with Claude
+claude
 
-# Define the Spec for the initial tool we are making.
-DETAILS=$(cat <<EOF
-<mcpServerName>$MCP_SERVER_NAME</mcpServerName>
-<toolSpec>
-    <toolsToExpose>
-        <tool>
-            <name>reverse_tool</name>
-            <description>String Reverse</description>
-        </tool>
-    </toolsToExpose>
-</toolSpec>
-EOF
-)
+# Once in interactive mode, send the following prompt:
+READ specs/*
+GITHUB: create a issue with the title: Implement: maven-mcp-server
+GIT: checkout a branch and swith to it.
+IMPLEMENT: maven-mcp-server
+INITIAL TOOL: version-check
 
-# Define the tools that are allowed.
-ALLOWED_TOOLS=(
-    "Bash"
-    "Edit"
-    "View"
-    "GlobTool"
-    "GrepTool"
-    "LSTool"
-    "BatchTool"
-    "AgentTool"
-    "WebFetchTool"
-    "Write"
-)
+-- Where it makes sense provide task updates to the GITHUB issue. --
 
-# Establish the prompt
-AI_PROMPT="
-- Run git ls-files and eza --git-ignore --tree to understand the context of the project.
-- Implement the Spec with:
-$DETAILS
-"
-
-# Execute the Agent
-claude -p $AI_PROMPT --allowedTools $ALLOWED_TOOLS --json
+On Completion:
+GIT: commit with a descriptive message.
+GIT: push the branch to the remote repository.
+GITHUB: create a PR.
 ```
+
+
