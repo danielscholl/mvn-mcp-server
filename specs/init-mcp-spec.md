@@ -1,4 +1,4 @@
-# Specification for a MCP Server
+# MCP Server Spec - maven-mcp-server
 
 > A minimal MCP server implementation to serve as a learning example and sanity check.
 
@@ -96,8 +96,8 @@ The server supports:
 
 ## Codebase Structure
 
-> NOTE: $ARG is a placeholder that should be replaced with the name of your MCP server (e.g., "my_mcp_server").
-> All instances of $ARG in this spec should be replaced with your chosen server name.
+> NOTE: $ARGUMENTS is a placeholder that should be replaced with the name of your MCP server (e.g., "my_mcp_server").
+> All instances of $ARGUMENTS in this spec should be replaced with your chosen server name.
 > When using hyphenated names like "my-mcp-server", they should be converted to valid Python package names by replacing hyphens with underscores (e.g., "my_mcp_server").
 
 
@@ -268,7 +268,10 @@ def test_sample_tool_empty_name():
         sample_tool(name="")
 ```
 
-## Validation (close the loop)
+-------------------------------
+# Validation (close the loop)
+-------------------------------
+> SUPER IMPORTANT
 
 - Run `uv sync` to install dependencies and create virtual environment
 - Run `uv pip install -e .` to install the package in development mode

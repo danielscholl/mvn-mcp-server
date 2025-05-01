@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(Edit:*)",
+      "Bash(View:*)",
+      "Bash(GlobTool:*)",
+      "Bash(GrepTool:*)",
+      "Bash(LSTool:*)",
+      "Bash(BatchTool:*)",
+      "Bash(AgentTool:*)",
+      "Bash(WebFetchTool:*)",
+      "Bash(Write:*)"
+    ],
+    "deny": []
+  }
+}
