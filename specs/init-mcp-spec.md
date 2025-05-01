@@ -2,6 +2,17 @@
 
 > A minimal MCP server implementation to serve as a learning example and sanity check.
 
+## 📋 Implementation Checklist
+
+The following tasks must be completed in order:
+
+1. [ ] 📁 Create project structure
+2. [ ] 📝 Create pyproject.toml
+3. [ ] 🛠️ Implement basic MCP server structure
+4. [ ] 🧩 Implement required tools
+5. [ ] 📊 Create tests for all components
+6. [ ] 🚨 Validate implementation (see validation checklist below)
+
 ## METADATA Prompt Argument Handling
 
 This prompt may receive additional arguments during initialization. Here's how to interpret this information:
@@ -15,7 +26,7 @@ The MCP server will receive the following arguments on initialization:
   
 - Contains `<toolSpec>` with `<toolsToExpose>` section listing tools
   - Each tool has exactly three tags:
-    - `<name>`: The tool function name (e.g., "reverse_tool")
+    - `<n>`: The tool function name (e.g., "reverse_tool")
     - `<description>`: Short description of the tool (e.g., "String Reverse")
     - `<details>`: Detailed explanation of the tool's functionality
   
@@ -25,7 +36,7 @@ The MCP server will receive the following arguments on initialization:
     <toolSpec>
         <toolsToExpose>
             <tool>
-                <name>my_tool_name</name>
+                <n>my_tool_name</n>
                 <description>my tool description</description>
                 <details>my tool details</details>
             </tool>
@@ -53,6 +64,13 @@ The MCP server will receive the following arguments on initialization:
 - The server will handle stdin/stdout communication with the client
 - FastMCP automatically handles conversion of tool results to MCP protocol format
 - Tool responses are returned as Python objects that FastMCP converts to proper `content` array format
+
+
+#### Library Versions
+- mcp ≥ 1.7.0
+- pydantic ≥ 2.11.4
+- requests ≥ 2.32.3
+
 
 ### Tool Response Flow
 1. Tool function returns a native Python type (like a string or dictionary)
@@ -268,12 +286,15 @@ def test_sample_tool_empty_name():
         sample_tool(name="")
 ```
 
--------------------------------
-# Validation (close the loop)
--------------------------------
-> SUPER IMPORTANT
+## 🚨 REQUIRED VALIDATION CHECKLIST 🚨
 
-- Run `uv sync` to install dependencies and create virtual environment
-- Run `uv pip install -e .` to install the package in development mode
-- Run `uv run pytest` to validate all tests are passing
-- At the end, use `uv run $mcpServerName --version` to validate the MCP server works
+Every implementation MUST complete all validation steps below in order:
+
+1. [ ] ✅ `uv sync` - Install dependencies and create virtual environment
+2. [ ] ✅ `uv pip install -e .` - Install the package in development mode
+3. [ ] ✅ `uv run pytest` - Run all tests and ensure they pass
+4. [ ] ✅ `uv run $mcpServerName --version` - Verify the server runs successfully
+
+⚠️ **WARNING**: Skipping any validation step is not acceptable. Your implementation is not complete until all validation steps pass successfully.
+
+📋 **Documentation**: Each validation step should be documented with the command output to confirm success.

@@ -2,11 +2,11 @@
 
 > Verify if a specific version of a Maven dependency exists in the Maven Central repository.
 
-## Implementation Details
-- Be sure to validate this functionality with uv run pytest
-- Implement direct version existence checking against Maven Central
-- Ensure robust error handling for all possible failure scenarios
-- Make sure this functionality works end to end as an MCP tool in the server.py file
+## Required Implementation Tasks
+
+- [ ] ⚠️ Implement direct version existence checking against Maven Central
+- [ ] ⚠️ Build robust error handling for all possible failure scenarios
+- [ ] ⚠️ Make sure this functionality works end to end as an MCP tool in the server.py file
 
 ### Tool Details
 - Implement in `src/maven_mcp_server/tools/version_exist.py`
@@ -92,11 +92,14 @@ check_maven_version_exists(
 - src/maven_mcp_server/tests/shared/test_utils.py
 
 
--------------------------------
-# Validation (close the loop)
--------------------------------
-> SUPER IMPORTANT
-> Be sure to test this capability with uv run pytest.
+## 🚨 REQUIRED VALIDATION CHECKLIST 🚨
 
-- `uv run pytest src/maven_mcp_server/tests/tools/test_version_exist.py`
-- Manual testing with actual Maven dependencies to verify real-world behavior
+Every implementation MUST complete all validation steps in order:
+
+1. [ ] ✅ Create and implement all required code
+2. [ ] ✅ Write comprehensive tests covering the scenarios described above
+3. [ ] ✅ Run test command: `uv run pytest src/maven_mcp_server/tests/tools/test_version_exist.py`
+4. [ ] ✅ Ensure all tests pass successfully
+5. [ ] ✅ Manually test with real-world Maven dependencies and versions
+
+📝 **Note:** These validation steps are MANDATORY and must be completed in order. Each step depends on successful completion of previous steps.

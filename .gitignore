@@ -1,6 +1,7 @@
 # AI Specific
 .aider*
 !.vscode/mcp.json
+!.claude/settings.local.json
 
 # Python-generated files
 __pycache__/
@@ -60,3 +61,4 @@ dmypy.json
 *.swp
 *.swo
 .DS_Store
+**/.claude/settings.local.json
