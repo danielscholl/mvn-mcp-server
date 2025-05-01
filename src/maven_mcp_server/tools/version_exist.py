@@ -178,9 +178,19 @@ def _check_version_in_metadata(group_id: str, artifact_id: str, version: str) ->
         # Parse the XML response
         xml_content = response.text
         
-        # Simple string-based check for the version in metadata
-        # Note: For production use, a proper XML parser would be better
-        return f"<version>{version}</version>" in xml_content
+        # Use an XML parser to check for the version in metadata
+        import xml.etree.ElementTree as ET
+        try:
+            root = ET.fromstring(xml_content)
+            for version_element in root.findall(".//version"):
+                if version_element.text == version:
+                    return True
+            return False
+        except ET.ParseError:
+            raise ResourceError(
+                "Failed to parse Maven metadata XML",
+                {"error_code": ErrorCode.MAVEN_API_ERROR}
+            )
         
     except requests.RequestException as e:
         # Handle network errors or non-200 responses
