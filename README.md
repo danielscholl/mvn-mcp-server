@@ -102,6 +102,63 @@ check_maven_version_exists: "org.springframework:spring-core" "5.3.10" "jar" "so
   }
   ```
 
+### Get Maven Latest Version
+
+Retrieves the latest version of a Maven dependency from the Maven Central repository.
+
+```
+get_maven_latest_version(
+    dependency: str,
+    packaging: str = "jar",
+    classifier: str | None = None
+) -> str
+```
+
+**Parameters:**
+- `dependency`: Maven dependency in format `groupId:artifactId` (e.g., "org.springframework:spring-core")
+- `packaging`: Package type (jar, war, pom, etc.), defaults to "jar"
+- `classifier`: Optional classifier (e.g., "sources", "javadoc")
+
+**Returns:**
+- A dictionary with a `latest_version` string indicating the latest available version
+
+**Usage Examples:**
+
+```
+# Get latest version of Spring Core
+get_maven_latest_version: "org.springframework:spring-core"
+
+# Get latest version with specific packaging
+get_maven_latest_version: "org.springframework:spring-web" "jar"
+
+# Get latest version with classifier
+get_maven_latest_version: "org.springframework:spring-core" "jar" "sources"
+```
+
+**Response Format:**
+- Success response:
+  ```json
+  {
+    "tool_name": "get_maven_latest_version",
+    "status": "success",
+    "result": {
+      "latest_version": "6.0.13"
+    }
+  }
+  ```
+
+- Error response:
+  ```json
+  {
+    "tool_name": "get_maven_latest_version",
+    "status": "error",
+    "error": {
+      "code": "INVALID_INPUT_FORMAT",
+      "message": "Dependency must be in groupId:artifactId format"
+    }
+  }
+  ```
+
 ## Error Codes
 
 | Code | Meaning |
