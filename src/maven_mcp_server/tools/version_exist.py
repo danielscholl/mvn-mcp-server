@@ -18,7 +18,7 @@ from maven_mcp_server.shared.utils import (
 )
 
 
-def check_maven_version_exists(
+def check_version(
     dependency: str,
     version: str,
     packaging: str = "jar",

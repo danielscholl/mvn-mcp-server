@@ -1,4 +1,4 @@
-# MCP Server Tool Spec - Get Latest Version
+# MCP Server Tool Spec - Latest Version
 
 > Core functionality to retrieve the latest version of a Maven dependency from the Maven Central repository.
 
@@ -11,7 +11,7 @@
 
 ### Tool Details
 - Implement in `src/maven_mcp_server/tools/check_version.py`
-- **get_maven_latest_version()**
+- **latest_version()**
   - Validate the dependency format (must be groupId:artifactId)
   - Query Maven Central API to retrieve all versions
   - Apply semantic versioning comparison to determine the actual latest version
@@ -41,7 +41,7 @@
 ## Tool to Expose
 
 ```text
-get_maven_latest_version(
+latest_version(
     dependency: str, 
     packaging: str = "jar", 
     classifier: str | None = None
@@ -53,7 +53,7 @@ get_maven_latest_version(
   ```python
   # Success response
   {
-    "tool_name": "get_maven_latest_version",
+    "tool_name": "latest_version",
     "status": "success",
     "result": {
         "latest_version": str
@@ -62,7 +62,7 @@ get_maven_latest_version(
   
   # Error response
   {
-    "tool_name": "get_maven_latest_version",
+    "tool_name": "latest_version",
     "status": "error",
     "error": {
         "code": str,  # One of the ErrorCode enum values

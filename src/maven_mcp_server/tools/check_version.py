@@ -21,7 +21,7 @@ from maven_mcp_server.shared.utils import (
 )
 
 
-def get_maven_latest_version(
+def latest_version(
     dependency: str,
     packaging: str = "jar",
     classifier: Optional[str] = None

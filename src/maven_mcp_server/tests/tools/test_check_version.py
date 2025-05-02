@@ -1,6 +1,6 @@
 """Tests for the Maven latest version retrieval tool.
 
-This module tests the get_maven_latest_version tool and related functions.
+This module tests the latest_version tool and related functions.
 """
 
 import pytest
@@ -10,7 +10,7 @@ from unittest.mock import patch, MagicMock
 from mcp.server.fastmcp.exceptions import ValidationError, ResourceError, ToolError
 
 from maven_mcp_server.tools.check_version import (
-    get_maven_latest_version,
+    latest_version,
     _fetch_all_versions_from_maven_central
 )
 from maven_mcp_server.shared.utils import (
@@ -20,15 +20,15 @@ from maven_mcp_server.shared.utils import (
 )
 
 
-class TestGetMavenLatestVersion:
-    """Tests for the get_maven_latest_version function."""
+class TestLatestVersion:
+    """Tests for the latest_version function."""
     
     @patch("maven_mcp_server.tools.check_version._fetch_all_versions_from_maven_central")
     def test_successful_retrieval(self, mock_fetch):
         """Test a successful latest version retrieval."""
         mock_fetch.return_value = ["5.3.9", "5.3.10", "5.3.11"]
         
-        result = get_maven_latest_version(
+        result = latest_version(
             "org.springframework:spring-core"
         )
         
@@ -43,7 +43,7 @@ class TestGetMavenLatestVersion:
         """Test with a mix of regular and snapshot versions."""
         mock_fetch.return_value = ["5.3.9", "5.3.10", "5.3.11", "5.3.12-SNAPSHOT"]
         
-        result = get_maven_latest_version(
+        result = latest_version(
             "org.springframework:spring-core"
         )
         
@@ -53,7 +53,7 @@ class TestGetMavenLatestVersion:
     def test_invalid_dependency_format(self):
         """Test with an invalid dependency format."""
         with pytest.raises(ValidationError):
-            get_maven_latest_version(
+            latest_version(
                 "org.springframework.spring-core"  # Invalid format
             )
     
@@ -62,7 +62,7 @@ class TestGetMavenLatestVersion:
         """Test with a custom packaging type."""
         mock_fetch.return_value = ["5.3.9", "5.3.10", "5.3.11"]
         
-        result = get_maven_latest_version(
+        result = latest_version(
             "org.springframework:spring-core",
             "war"
         )
@@ -78,7 +78,7 @@ class TestGetMavenLatestVersion:
         # Mock that the latest version has the classifier
         mock_check_artifact.return_value = True
         
-        result = get_maven_latest_version(
+        result = latest_version(
             "org.springframework:spring-core",
             "jar",
             "sources"
@@ -102,7 +102,7 @@ class TestGetMavenLatestVersion:
         # Mock that the latest version doesn't have the classifier but an older one does
         mock_check_artifact.side_effect = lambda g, a, v, p, c: v == "5.3.10"
         
-        result = get_maven_latest_version(
+        result = latest_version(
             "org.springframework:spring-core",
             "jar",
             "sources"
@@ -116,7 +116,7 @@ class TestGetMavenLatestVersion:
         """Test with a BOM dependency."""
         mock_fetch.return_value = ["5.3.9", "5.3.10", "5.3.11"]
         
-        result = get_maven_latest_version(
+        result = latest_version(
             "org.springframework:spring-bom"
         )
         
@@ -131,7 +131,7 @@ class TestGetMavenLatestVersion:
         
         # The exception can be either a ResourceError directly or wrapped in a ToolError
         try:
-            get_maven_latest_version(
+            latest_version(
                 "org.springframework:spring-core"
             )
             pytest.fail("Expected exception was not raised")
@@ -145,7 +145,7 @@ class TestGetMavenLatestVersion:
         mock_fetch.side_effect = requests.RequestException("Connection error")
         
         with pytest.raises(ResourceError):
-            get_maven_latest_version(
+            latest_version(
                 "org.springframework:spring-core"
             )
     
@@ -155,7 +155,7 @@ class TestGetMavenLatestVersion:
         mock_fetch.side_effect = Exception("Unexpected error")
         
         with pytest.raises(ToolError):
-            get_maven_latest_version(
+            latest_version(
                 "org.springframework:spring-core"
             )
 

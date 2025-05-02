@@ -1,4 +1,4 @@
-# MCP Server Tool Spec - Check Maven Version Exists
+# MCP Server Tool Spec - Check Version
 
 > Verify if a specific version of a Maven dependency exists in the Maven Central repository.
 
@@ -10,7 +10,7 @@
 
 ### Tool Details
 - Implement in `src/maven_mcp_server/tools/version_exist.py`
-- **check_maven_version_exists()**
+- **check_version()**
   - Validate the dependency format (must be groupId:artifactId)
   - Validate the version string format
   - Query Maven Central API to check if the specific version exists
@@ -42,7 +42,7 @@
 ## Tool to Expose
 
 ```text
-check_maven_version_exists(
+check_version(
     dependency: str,
     version: str,
     packaging: str = "jar",
@@ -55,7 +55,7 @@ check_maven_version_exists(
   ```python
   # Success response
   {
-    "tool_name": "check_maven_version_exists",
+    "tool_name": "check_version",
     "status": "success",
     "result": {
         "exists": bool
@@ -64,7 +64,7 @@ check_maven_version_exists(
   
   # Error response
   {
-    "tool_name": "check_maven_version_exists",
+    "tool_name": "check_version",
     "status": "error",
     "error": {
         "code": str,  # One of the ErrorCode enum values
