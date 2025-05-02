@@ -4,7 +4,8 @@ This module contains helper functions for API calls, response formatting, and er
 """
 
 import re
-from typing import Dict, Any, Optional
+import functools
+from typing import Dict, Any, Optional, List
 
 import requests
 from mcp.server.fastmcp.exceptions import ValidationError, ToolError, ResourceError
@@ -102,3 +103,148 @@ def determine_packaging(packaging: str, artifact_id: str) -> str:
     
     # Otherwise use the provided packaging or default to jar
     return packaging.lower() if packaging else "jar"
+
+
+def parse_version_components(version: str) -> tuple[List[int], str]:
+    """Parse a version string into numeric components and qualifier.
+    
+    Args:
+        version: Version string (e.g., "1.2.3-SNAPSHOT")
+        
+    Returns:
+        Tuple of (numeric_components, qualifier)
+        where numeric_components is a list of integers
+        and qualifier is the non-numeric suffix (if any)
+    """
+    # Split version into numeric part and qualifier
+    match = re.match(r'^([\d]+(?:\.[\d]+)*)([-.].*)?$', version)
+    if not match:
+        return [], version
+    
+    numeric_part, qualifier = match.groups()
+    if qualifier is None:
+        qualifier = ""
+    
+    # Convert numeric components to integers
+    components = [int(part) for part in numeric_part.split(".")]
+    
+    return components, qualifier
+
+
+def compare_versions(version1: str, version2: str) -> int:
+    """Compare two version strings semantically.
+    
+    Args:
+        version1: First version string
+        version2: Second version string
+        
+    Returns:
+        -1 if version1 < version2
+        0 if version1 == version2
+        1 if version1 > version2
+    """
+    # Handle None or empty input
+    if not version1 and version2:
+        return -1
+    if version1 and not version2:
+        return 1
+    if not version1 and not version2:
+        return 0
+        
+    # Parse version components
+    v1_numeric, v1_qualifier = parse_version_components(version1)
+    v2_numeric, v2_qualifier = parse_version_components(version2)
+    
+    # Compare numeric parts first
+    for c1, c2 in zip(v1_numeric, v2_numeric):
+        if c1 < c2:
+            return -1
+        if c1 > c2:
+            return 1
+    
+    # If one version has more numeric components, it's usually newer
+    if len(v1_numeric) < len(v2_numeric):
+        return -1
+    if len(v1_numeric) > len(v2_numeric):
+        return 1
+    
+    # Finally, compare qualifiers
+    # No qualifier is considered higher than any qualifier
+    if not v1_qualifier and v2_qualifier:
+        return 1
+    if v1_qualifier and not v2_qualifier:
+        return -1
+    
+    # Handle special qualifiers with known rankings
+    qualifier_ranks = {
+        "final": 100,
+        "release": 90,
+        "ga": 80,
+        "": 70,  # No qualifier is high but below explicit final/release
+        "rc": 60,
+        "cr": 50,
+        "beta": 40,
+        "alpha": 30,
+        "snapshot": 10
+    }
+    
+    # Extract main qualifier type
+    v1_type = v1_qualifier.lower().replace("-", "").replace(".", "")
+    v2_type = v2_qualifier.lower().replace("-", "").replace(".", "")
+    
+    # Try to match known qualifier types
+    v1_rank = 0
+    v2_rank = 0
+    
+    for q_type, rank in qualifier_ranks.items():
+        if q_type in v1_type:
+            v1_rank = max(v1_rank, rank)
+        if q_type in v2_type:
+            v2_rank = max(v2_rank, rank)
+    
+    if v1_rank != v2_rank:
+        return 1 if v1_rank > v2_rank else -1
+    
+    # Default lexicographical comparison for qualifiers with same rank
+    if v1_qualifier < v2_qualifier:
+        return -1
+    if v1_qualifier > v2_qualifier:
+        return 1
+    
+    # Versions are equal
+    return 0
+
+
+def get_latest_version(versions: List[str], include_snapshots: bool = False) -> str:
+    """Find the latest version from a list of versions.
+    
+    Args:
+        versions: List of version strings
+        include_snapshots: Whether to include SNAPSHOT versions
+        
+    Returns:
+        The latest version string
+        
+    Raises:
+        ValueError: If no valid versions are found
+    """
+    if not versions:
+        raise ValueError("No versions provided")
+    
+    # Filter out SNAPSHOT versions if needed
+    filtered_versions = versions
+    if not include_snapshots:
+        filtered_versions = [v for v in versions if "snapshot" not in v.lower()]
+        
+        # If filtering removed all versions, fall back to original list
+        if not filtered_versions and versions:
+            filtered_versions = versions
+    
+    # Sort versions using semantic versioning comparison
+    def version_comparator(v1, v2):
+        return compare_versions(v1, v2)
+    
+    sorted_versions = sorted(filtered_versions, key=functools.cmp_to_key(version_comparator), 
+                             reverse=True)
+    
+    return sorted_versions[0] if sorted_versions else ""
