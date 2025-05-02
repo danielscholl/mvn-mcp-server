@@ -1,7 +1,7 @@
 READ specs/$ARGUMENT
 
 Before Starting:
-- GITHUB: create a issue with the a short descriptive title.
+- GITHUB: create a issue with the a short descriptive title./exi
 - GIT: checkout a branch and swith to it.
 
 IMPLEMENT TOOL
