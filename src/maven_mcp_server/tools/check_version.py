@@ -4,6 +4,7 @@ This module implements a tool to get the latest version of a Maven
 dependency from the Maven Central repository.
 """
 
+import functools
 import xml.etree.ElementTree as ET
 from typing import Dict, Any, Optional, List
 
@@ -15,6 +16,7 @@ from maven_mcp_server.shared.utils import (
     validate_maven_dependency,
     determine_packaging,
     get_latest_version,
+    compare_versions,
     format_error_response
 )
 
@@ -61,6 +63,26 @@ def get_maven_latest_version(
         
         # Get the latest version
         latest_version = get_latest_version(versions)
+        
+        # Verify that the specific version with the requested packaging and classifier exists
+        if classifier:
+            # Check if the artifact with the specified classifier exists for the latest version
+            artifact_exists = _check_specific_artifact_exists(
+                group_id,
+                artifact_id,
+                latest_version,
+                actual_packaging,
+                classifier
+            )
+            if not artifact_exists:
+                # Find the next latest version that has the specified classifier
+                for version in sorted(versions, key=functools.cmp_to_key(compare_versions), reverse=True):
+                    if version != latest_version:
+                        if _check_specific_artifact_exists(
+                            group_id, artifact_id, version, actual_packaging, classifier
+                        ):
+                            latest_version = version
+                            break
         
         # Return success response
         return {
@@ -148,3 +170,38 @@ def _fetch_all_versions_from_maven_central(
     
     # Default fallback (should not reach here under normal circumstances)
     return []
+
+
+def _check_specific_artifact_exists(
+    group_id: str,
+    artifact_id: str,
+    version: str,
+    packaging: str,
+    classifier: str
+) -> bool:
+    """Check if a specific artifact with classifier exists in Maven Central.
+    
+    Args:
+        group_id: The Maven group ID
+        artifact_id: The Maven artifact ID
+        version: The specific version to check
+        packaging: The packaging type (jar, war, etc.)
+        classifier: The classifier to check for
+        
+    Returns:
+        Boolean indicating if the artifact with classifier exists
+    """
+    # Convert group ID dots to slashes for repository path
+    group_path = group_id.replace(".", "/")
+    
+    # Build the URL for the direct repository check
+    base_url = f"https://repo1.maven.org/maven2/{group_path}/{artifact_id}/{version}/"
+    file_name = f"{artifact_id}-{version}-{classifier}.{packaging}"
+    file_url = base_url + file_name
+    
+    # Check if the file exists using a HEAD request
+    try:
+        response = requests.head(file_url, timeout=10)
+        return response.status_code == 200
+    except requests.RequestException:
+        return False

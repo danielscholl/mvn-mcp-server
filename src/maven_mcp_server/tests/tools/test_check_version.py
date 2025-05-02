@@ -70,9 +70,13 @@ class TestGetMavenLatestVersion:
         assert result == {"latest_version": "5.3.11"}
     
     @patch("maven_mcp_server.tools.check_version._fetch_all_versions_from_maven_central")
-    def test_with_classifier(self, mock_fetch):
+    @patch("maven_mcp_server.tools.check_version._check_specific_artifact_exists")
+    def test_with_classifier(self, mock_check_artifact, mock_fetch):
         """Test with a classifier."""
         mock_fetch.return_value = ["5.3.9", "5.3.10", "5.3.11"]
+        
+        # Mock that the latest version has the classifier
+        mock_check_artifact.return_value = True
         
         result = get_maven_latest_version(
             "org.springframework:spring-core",
@@ -81,6 +85,31 @@ class TestGetMavenLatestVersion:
         )
         
         assert result == {"latest_version": "5.3.11"}
+        mock_check_artifact.assert_called_once_with(
+            "org.springframework", 
+            "spring-core", 
+            "5.3.11", 
+            "jar", 
+            "sources"
+        )
+        
+    @patch("maven_mcp_server.tools.check_version._fetch_all_versions_from_maven_central")
+    @patch("maven_mcp_server.tools.check_version._check_specific_artifact_exists")
+    def test_with_classifier_fallback(self, mock_check_artifact, mock_fetch):
+        """Test fallback when latest version doesn't have the classifier."""
+        mock_fetch.return_value = ["5.3.9", "5.3.10", "5.3.11"]
+        
+        # Mock that the latest version doesn't have the classifier but an older one does
+        mock_check_artifact.side_effect = lambda g, a, v, p, c: v == "5.3.10"
+        
+        result = get_maven_latest_version(
+            "org.springframework:spring-core",
+            "jar",
+            "sources"
+        )
+        
+        # Should return the older version that has the classifier
+        assert result == {"latest_version": "5.3.10"}
     
     @patch("maven_mcp_server.tools.check_version._fetch_all_versions_from_maven_central")
     def test_with_bom_dependency(self, mock_fetch):
