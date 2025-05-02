@@ -43,12 +43,12 @@ To use this MCP server in your projects, add the following to your `.mcp.json` f
 
 ## Available Tools
 
-### Check Maven Version Exists
+### Check Version
 
 Verifies if a specific version of a Maven dependency exists in the Maven Central repository.
 
 ```
-check_maven_version_exists(
+check_version(
     dependency: str,
     version: str,
     packaging: str = "jar",
@@ -69,20 +69,20 @@ check_maven_version_exists(
 
 ```
 # Check if Spring Core 5.3.10 exists
-check_maven_version_exists: "org.springframework:spring-core" "5.3.10"
+check_version: "org.springframework:spring-core" "5.3.10"
 
 # Check with specific packaging
-check_maven_version_exists: "org.springframework:spring-web" "5.3.10" "jar"
+check_version: "org.springframework:spring-web" "5.3.10" "jar"
 
 # Check with classifier
-check_maven_version_exists: "org.springframework:spring-core" "5.3.10" "jar" "sources"
+check_version: "org.springframework:spring-core" "5.3.10" "jar" "sources"
 ```
 
 **Response Format:**
 - Success response:
   ```json
   {
-    "tool_name": "check_maven_version_exists",
+    "tool_name": "check_version",
     "status": "success",
     "result": {
       "exists": true
@@ -93,7 +93,7 @@ check_maven_version_exists: "org.springframework:spring-core" "5.3.10" "jar" "so
 - Error response:
   ```json
   {
-    "tool_name": "check_maven_version_exists",
+    "tool_name": "check_version",
     "status": "error",
     "error": {
       "code": "INVALID_INPUT_FORMAT",
@@ -102,12 +102,12 @@ check_maven_version_exists: "org.springframework:spring-core" "5.3.10" "jar" "so
   }
   ```
 
-### Get Maven Latest Version
+### Latest Version
 
 Retrieves the latest version of a Maven dependency from the Maven Central repository.
 
 ```
-get_maven_latest_version(
+latest_version(
     dependency: str,
     packaging: str = "jar",
     classifier: str | None = None
@@ -126,20 +126,20 @@ get_maven_latest_version(
 
 ```
 # Get latest version of Spring Core
-get_maven_latest_version: "org.springframework:spring-core"
+latest_version: "org.springframework:spring-core"
 
 # Get latest version with specific packaging
-get_maven_latest_version: "org.springframework:spring-web" "jar"
+latest_version: "org.springframework:spring-web" "jar"
 
 # Get latest version with classifier
-get_maven_latest_version: "org.springframework:spring-core" "jar" "sources"
+latest_version: "org.springframework:spring-core" "jar" "sources"
 ```
 
 **Response Format:**
 - Success response:
   ```json
   {
-    "tool_name": "get_maven_latest_version",
+    "tool_name": "latest_version",
     "status": "success",
     "result": {
       "latest_version": "6.0.13"
@@ -150,7 +150,7 @@ get_maven_latest_version: "org.springframework:spring-core" "jar" "sources"
 - Error response:
   ```json
   {
-    "tool_name": "get_maven_latest_version",
+    "tool_name": "latest_version",
     "status": "error",
     "error": {
       "code": "INVALID_INPUT_FORMAT",

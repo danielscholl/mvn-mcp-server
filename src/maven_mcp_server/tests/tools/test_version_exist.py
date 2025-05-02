@@ -1,6 +1,6 @@
 """Tests for the Maven version existence checking tool.
 
-This module tests the check_maven_version_exists tool and related functions.
+This module tests the check_version tool and related functions.
 """
 
 import pytest
@@ -10,21 +10,21 @@ from unittest.mock import patch, MagicMock
 from mcp.server.fastmcp.exceptions import ValidationError, ResourceError, ToolError
 
 from maven_mcp_server.tools.version_exist import (
-    check_maven_version_exists,
+    check_version,
     _check_version_exists_in_maven_central,
     _check_version_in_metadata
 )
 
 
-class TestCheckMavenVersionExists:
-    """Tests for the check_maven_version_exists function."""
+class TestCheckVersion:
+    """Tests for the check_version function."""
     
     @patch("maven_mcp_server.tools.version_exist._check_version_exists_in_maven_central")
     def test_successful_check_true(self, mock_check):
         """Test a successful version check that returns True."""
         mock_check.return_value = True
         
-        result = check_maven_version_exists(
+        result = check_version(
             "org.springframework:spring-core",
             "5.3.10"
         )
@@ -43,7 +43,7 @@ class TestCheckMavenVersionExists:
         """Test a successful version check that returns False."""
         mock_check.return_value = False
         
-        result = check_maven_version_exists(
+        result = check_version(
             "org.springframework:spring-core",
             "999.999.999"  # Non-existent version
         )
@@ -53,7 +53,7 @@ class TestCheckMavenVersionExists:
     def test_invalid_dependency_format(self):
         """Test with an invalid dependency format."""
         with pytest.raises(ValidationError):
-            check_maven_version_exists(
+            check_version(
                 "org.springframework.spring-core",  # Invalid format
                 "5.3.10"
             )
@@ -61,7 +61,7 @@ class TestCheckMavenVersionExists:
     def test_invalid_version_format(self):
         """Test with an invalid version format."""
         with pytest.raises(ValidationError):
-            check_maven_version_exists(
+            check_version(
                 "org.springframework:spring-core",
                 "invalid-version"  # Invalid format
             )
@@ -71,7 +71,7 @@ class TestCheckMavenVersionExists:
         """Test with a custom packaging type."""
         mock_check.return_value = True
         
-        result = check_maven_version_exists(
+        result = check_version(
             "org.springframework:spring-core",
             "5.3.10",
             "war"
@@ -91,7 +91,7 @@ class TestCheckMavenVersionExists:
         """Test with a classifier."""
         mock_check.return_value = True
         
-        result = check_maven_version_exists(
+        result = check_version(
             "org.springframework:spring-core",
             "5.3.10",
             "jar",
@@ -112,7 +112,7 @@ class TestCheckMavenVersionExists:
         """Test with a BOM dependency."""
         mock_check.return_value = True
         
-        result = check_maven_version_exists(
+        result = check_version(
             "org.springframework:spring-bom",
             "5.3.10"
         )
@@ -133,7 +133,7 @@ class TestCheckMavenVersionExists:
         mock_check.side_effect = requests.RequestException("Connection error")
         
         with pytest.raises(ResourceError):
-            check_maven_version_exists(
+            check_version(
                 "org.springframework:spring-core",
                 "5.3.10"
             )
@@ -144,7 +144,7 @@ class TestCheckMavenVersionExists:
         mock_check.side_effect = Exception("Unexpected error")
         
         with pytest.raises(ToolError):
-            check_maven_version_exists(
+            check_version(
                 "org.springframework:spring-core",
                 "5.3.10"
             )
