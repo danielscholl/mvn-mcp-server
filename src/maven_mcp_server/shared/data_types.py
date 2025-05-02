@@ -45,3 +45,24 @@ class MavenVersionCheckRequest(BaseModel):
         if not v or not isinstance(v, str):
             raise ValueError("Version cannot be empty")
         return v
+
+
+class MavenLatestVersionRequest(BaseModel):
+    """Request model for getting latest Maven version."""
+    
+    dependency: str = Field(description="Maven dependency in groupId:artifactId format")
+    packaging: str = Field(default="jar", description="Package type (jar, war, etc.)")
+    classifier: str | None = Field(default=None, description="Optional classifier")
+    
+    @field_validator("dependency")
+    @classmethod
+    def validate_dependency(cls, v: str) -> str:
+        """Validate the dependency format (groupId:artifactId)."""
+        if not v or not isinstance(v, str):
+            raise ValueError("Dependency cannot be empty")
+        
+        # Check for groupId:artifactId format
+        if ":" not in v or v.count(":") != 1:
+            raise ValueError("Dependency must be in groupId:artifactId format")
+        
+        return v
