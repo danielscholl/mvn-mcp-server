@@ -170,7 +170,7 @@ find_version(
     target_component: str,
     packaging: str = "jar",
     classifier: str | None = None
-) -> str
+) -> Dict[str, str]
 ```
 
 **Parameters:**
