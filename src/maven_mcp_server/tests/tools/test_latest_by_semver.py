@@ -385,6 +385,7 @@ class TestIntegrationTests:
             # If we can't find the latest version, skip this test rather than fail
             pytest.skip("Could not find latest patch version for org.springframework:spring-core")
     
+    @pytest.mark.skip(reason="Depends on external API")
     def test_real_spring_boot_special_handling(self):
         """Integration test with Spring Boot which might need special handling."""
         result = find_version(
@@ -401,6 +402,7 @@ class TestIntegrationTests:
         # Verify it's a valid version number
         assert latest_version[0].isdigit(), "Latest version should start with a digit"
     
+    @pytest.mark.skip(reason="Depends on external API")
     def test_real_with_bom_dependency(self):
         """Integration test with a BOM dependency."""
         result = find_version(
