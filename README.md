@@ -1,6 +1,6 @@
 # Maven MCP Server
 
-A Model-Client-Programmer (MCP) server that provides tools for working with Maven dependencies, specifically for checking if specific versions of dependencies exist in the Maven Central repository.
+A Model-Client-Programmer (MCP) server that provides tools for working with Maven dependencies, specifically for checking if specific versions of dependencies exist in the Maven Central repository, retrieving the latest versions, and finding the latest version based on semantic versioning components.
 
 ## Setup
 
@@ -159,13 +159,82 @@ latest_version: "org.springframework:spring-core" "jar" "sources"
   }
   ```
 
+### Find Latest Component Version
+
+Finds the latest version of a Maven dependency based on semantic versioning components (major, minor, patch).
+
+```
+find_version(
+    dependency: str,
+    version: str,
+    target_component: str,
+    packaging: str = "jar",
+    classifier: str | None = None
+) -> str
+```
+
+**Parameters:**
+- `dependency`: Maven dependency in format `groupId:artifactId` (e.g., "org.springframework:spring-core")
+- `version`: Version string to use as reference (e.g., "5.3.10")
+- `target_component`: Component to find the latest version for ("major", "minor", or "patch")
+- `packaging`: Package type (jar, war, pom, etc.), defaults to "jar"
+- `classifier`: Optional classifier (e.g., "sources", "javadoc")
+
+**Returns:**
+- A dictionary with a `latest_version` string indicating the latest available version for the specified component
+
+**Usage Examples:**
+
+```
+# Find the latest major version based on reference version 5.3.10
+find_version: "org.springframework:spring-core" "5.3.10" "major"
+
+# Find the latest minor version within major version 5 
+find_version: "org.springframework:spring-core" "5.0.0" "minor"
+
+# Find the latest patch version within 5.3.x
+find_version: "org.springframework:spring-core" "5.3.0" "patch"
+
+# Find with specific packaging
+find_version: "org.springframework:spring-web" "5.3.10" "major" "war"
+
+# Find with classifier
+find_version: "org.springframework:spring-core" "5.3.10" "major" "jar" "sources"
+```
+
+**Response Format:**
+- Success response:
+  ```json
+  {
+    "tool_name": "find_version",
+    "status": "success",
+    "result": {
+      "latest_version": "6.0.13"
+    }
+  }
+  ```
+
+- Error response:
+  ```json
+  {
+    "tool_name": "find_version",
+    "status": "error",
+    "error": {
+      "code": "INVALID_TARGET_COMPONENT",
+      "message": "Target component must be one of 'major', 'minor', or 'patch'"
+    }
+  }
+  ```
+
 ## Error Codes
 
 | Code | Meaning |
 |------|---------|
 | INVALID_INPUT_FORMAT | Malformed dependency or version string |
+| INVALID_TARGET_COMPONENT | Invalid target_component value |
 | MISSING_PARAMETER    | Required parameter missing |
 | DEPENDENCY_NOT_FOUND | No versions found for the dependency |
+| VERSION_NOT_FOUND    | Version not found though dependency exists |
 | MAVEN_API_ERROR      | Upstream Maven Central error (non‑200, network failure) |
 | INTERNAL_SERVER_ERROR| Unhandled exception inside the server |
 
