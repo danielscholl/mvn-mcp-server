@@ -89,7 +89,7 @@ def find_maven_version(dependency: str, version: str, target_component: str, pac
     result = check_version(dependency, version, packaging, classifier)
     
     # Extract the specific component version from the result
-    if result["status"] == "success":
+    if result["status"] == "success" and "latest_versions" in result["result"]:
         component_version = result["result"]["latest_versions"].get(target_component)
         
         # Format the response to match the original format
@@ -104,7 +104,7 @@ def find_maven_version(dependency: str, version: str, target_component: str, pac
             logger.info(f"Result: {component_version}")
             return find_result
     
-    # If there was an error, pass through the error response
+    # If there was an error or the structure isn't as expected, log and return an error
     logger.error(f"Error finding version for component: {target_component}")
     return result
 
