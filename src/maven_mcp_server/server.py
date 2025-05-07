@@ -16,6 +16,7 @@ from maven_mcp_server.tools.latest_by_semver import find_version
 # Import the new consolidated tools
 from maven_mcp_server.tools.check_version import check_version
 from maven_mcp_server.tools.check_version_batch import check_version_batch
+from maven_mcp_server.tools.list_available_versions import list_available_versions
 
 # Configure logging
 logging.basicConfig(
@@ -131,4 +132,56 @@ def check_version_batch_tool(dependencies: List[Dict[str, Any]]):
                 f"updates available: major={summary.get('updates_available', {}).get('major', 0)}, "
                 f"minor={summary.get('updates_available', {}).get('minor', 0)}, "
                 f"patch={summary.get('updates_available', {}).get('patch', 0)}")
+    return result
+
+@mcp.tool(
+    description="List all available versions of a Maven artifact grouped by minor version tracks"
+)
+def list_available_versions_tool(
+    dependency: str, 
+    version: str, 
+    packaging: str = "jar", 
+    classifier: str = None,
+    include_all_versions: bool = False
+):
+    """List all available versions of a Maven dependency grouped by minor tracks.
+    
+    This tool provides a comprehensive view of all available versions for a Maven dependency,
+    organized by major.minor version tracks. It helps developers make informed decisions
+    about version upgrades by showing the complete version landscape.
+    
+    Args:
+        dependency: Maven dependency in groupId:artifactId format
+        version: Current version string to use as reference
+        packaging: Package type (jar, war, etc.), defaults to "jar"
+        classifier: Optional classifier
+        include_all_versions: Whether to include all versions in the response (default: False)
+            When False, only includes versions for the current track
+            When True, includes full version lists for all tracks
+            
+    Returns:
+        Structured version information including:
+        - Current version and whether it exists
+        - Latest overall version
+        - All minor version tracks with their latest versions
+        - Full version lists for selected tracks based on include_all_versions
+    """
+    logger.info(f"MCP call to list_available_versions with: {dependency}, {version}, include_all={include_all_versions}")
+    result = list_available_versions(
+        dependency, 
+        version, 
+        packaging, 
+        classifier, 
+        include_all_versions
+    )
+    
+    # Log info about the result
+    minor_tracks = result.get("result", {}).get("minor_tracks", {})
+    track_count = len(minor_tracks)
+    current_track = next((track for track, info in minor_tracks.items() 
+                          if info.get("is_current_track", False)), "none")
+    
+    logger.info(f"Found {track_count} minor version tracks for {dependency}, "
+                f"current track: {current_track}")
+    
     return result

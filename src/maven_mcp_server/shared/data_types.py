@@ -16,6 +16,7 @@ class ErrorCode(str, Enum):
     MISSING_PARAMETER = "MISSING_PARAMETER"
     DEPENDENCY_NOT_FOUND = "DEPENDENCY_NOT_FOUND"
     VERSION_NOT_FOUND = "VERSION_NOT_FOUND"
+    VERSION_INVALID = "VERSION_INVALID"
     MAVEN_API_ERROR = "MAVEN_API_ERROR"
     INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR"
 
@@ -181,4 +182,35 @@ class MavenBatchVersionCheckRequest(BaseModel):
         """Validate the dependencies list."""
         if not v or len(v) == 0:
             raise ValueError("At least one dependency is required")
+        return v
+
+
+class MavenListAvailableVersionsRequest(BaseModel):
+    """Request model for listing available Maven versions by minor tracks."""
+    
+    dependency: str = Field(description="Maven dependency in groupId:artifactId format")
+    version: str = Field(description="Current version string to use as reference")
+    packaging: str = Field(default="jar", description="Package type (jar, war, etc.)")
+    classifier: str | None = Field(default=None, description="Optional classifier")
+    include_all_versions: bool = Field(default=False, description="Whether to include all versions in the response")
+    
+    @field_validator("dependency")
+    @classmethod
+    def validate_dependency(cls, v: str) -> str:
+        """Validate the dependency format (groupId:artifactId)."""
+        if not v or not isinstance(v, str):
+            raise ValueError("Dependency cannot be empty")
+        
+        # Check for groupId:artifactId format
+        if ":" not in v or v.count(":") != 1:
+            raise ValueError("Dependency must be in groupId:artifactId format")
+        
+        return v
+    
+    @field_validator("version")
+    @classmethod
+    def validate_version(cls, v: str) -> str:
+        """Validate the version string."""
+        if not v or not isinstance(v, str):
+            raise ValueError("Version cannot be empty")
         return v
