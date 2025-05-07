@@ -43,138 +43,7 @@ To use this MCP server in your projects, add the following to your `.mcp.json` f
 
 ## Available Tools
 
-This MCP server provides six main tools for working with Maven dependencies:
-
-### Check Maven Version
-
-Verifies if a specific version of a Maven dependency exists in the Maven Central repository.
-
-**Tool Name:** `maven-mcp-server__check_maven_version`
-
-**Parameters:**
-- `dependency`: Maven dependency in format `groupId:artifactId` (e.g., "org.springframework:spring-core")
-- `version`: Version string to check (e.g., "5.3.10")
-- `packaging`: (Optional) Package type (jar, war, pom, etc.), defaults to "jar"
-- `classifier`: (Optional) Classifier (e.g., "sources", "javadoc")
-
-**Usage Example:**
-
-```python
-# Through the Claude Code assistant:
-mcp__maven-mcp-server__check_maven_version(
-    dependency="org.springframework:spring-core",
-    version="5.3.10"
-)
-
-# With optional parameters:
-mcp__maven-mcp-server__check_maven_version(
-    dependency="org.springframework:spring-core",
-    version="5.3.10",
-    packaging="jar",
-    classifier="sources"
-)
-```
-
-**Response Format:**
-```json
-{
-  "tool_name": "check_version",
-  "status": "success",
-  "result": {
-    "exists": true
-  }
-}
-```
-
-### Get Maven Latest Version
-
-Retrieves the latest version of a Maven dependency from the Maven Central repository.
-
-**Tool Name:** `maven-mcp-server__get_maven_latest_version`
-
-**Parameters:**
-- `dependency`: Maven dependency in format `groupId:artifactId` (e.g., "org.springframework:spring-core")
-- `packaging`: (Optional) Package type (jar, war, pom, etc.), defaults to "jar"
-- `classifier`: (Optional) Classifier (e.g., "sources", "javadoc")
-
-**Usage Example:**
-
-```python
-# Through the Claude Code assistant:
-mcp__maven-mcp-server__get_maven_latest_version(
-    dependency="org.springframework:spring-core"
-)
-
-# With optional parameters:
-mcp__maven-mcp-server__get_maven_latest_version(
-    dependency="org.springframework:spring-core",
-    packaging="jar",
-    classifier="sources"
-)
-```
-
-**Response Format:**
-```json
-{
-  "tool_name": "latest_version",
-  "status": "success",
-  "result": {
-    "latest_version": "7.0.0-M4"
-  }
-}
-```
-
-### Find Maven Version
-
-Finds the latest version of a Maven dependency based on semantic versioning components (major, minor, patch).
-
-**Tool Name:** `maven-mcp-server__find_maven_version`
-
-**Parameters:**
-- `dependency`: Maven dependency in format `groupId:artifactId` (e.g., "org.springframework:spring-core")
-- `version`: Version string to use as reference (e.g., "5.3.10")
-- `target_component`: Component to find the latest version for ("major", "minor", or "patch")
-- `packaging`: (Optional) Package type (jar, war, pom, etc.), defaults to "jar"
-- `classifier`: (Optional) Classifier (e.g., "sources", "javadoc")
-
-**Usage Example:**
-
-```python
-# Through the Claude Code assistant:
-# Find the latest patch version within 5.3.x
-mcp__maven-mcp-server__find_maven_version(
-    dependency="org.springframework:spring-core",
-    version="5.3.0",
-    target_component="patch"
-)
-
-# Find the latest minor version within major version 5 
-mcp__maven-mcp-server__find_maven_version(
-    dependency="org.springframework:spring-core",
-    version="5.0.0",
-    target_component="minor"
-)
-
-# With optional parameters:
-mcp__maven-mcp-server__find_maven_version(
-    dependency="org.springframework:spring-core",
-    version="5.3.0",
-    target_component="patch",
-    packaging="jar",
-    classifier="sources"
-)
-```
-
-**Response Format:**
-```json
-{
-  "tool_name": "find_version",
-  "status": "success",
-  "result": {
-    "latest_version": "5.3.39"
-  }
-}
-```
+This MCP server provides three core tools for working with Maven dependencies:
 
 ### Check Maven Version Tool
 
@@ -227,6 +96,8 @@ mcp__maven-mcp-server__check_version_tool(
   }
 }
 ```
+
+> **Note:** The server still maintains the original `check_maven_version`, `get_maven_latest_version`, and `find_maven_version` tools for backward compatibility, but they now use the comprehensive `check_version_tool` internally.
 
 ### Check Maven Version Batch Tool
 
@@ -465,7 +336,7 @@ Common error codes include:
 uv run pytest
 
 # Run specific tests
-uv run pytest src/maven_mcp_server/tests/tools/test_version_exist.py
+uv run pytest src/maven_mcp_server/tests/tools/test_check_version.py
 ```
 
 ### Architecture

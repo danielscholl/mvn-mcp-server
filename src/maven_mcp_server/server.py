@@ -8,13 +8,8 @@ import logging
 from typing import List, Dict, Any
 from mcp.server.fastmcp import FastMCP
 
-# Import the original tools (maintained for backward compatibility)
-from maven_mcp_server.tools.version_exist import check_version as version_exist_check
-from maven_mcp_server.tools.check_version import latest_version
-from maven_mcp_server.tools.latest_by_semver import find_version
-
-# Import the new consolidated tools
-from maven_mcp_server.tools.check_version import check_version
+# Import the consolidated tools
+from maven_mcp_server.tools.check_version import check_version, latest_version
 from maven_mcp_server.tools.check_version_batch import check_version_batch
 from maven_mcp_server.tools.list_available_versions import list_available_versions
 
@@ -31,7 +26,7 @@ mcp = FastMCP(
     description="A server providing tools for Maven dependency version management"
 )
 
-# Register original tools with detailed descriptions (maintained for backward compatibility)
+# Register MCP tools with detailed descriptions
 @mcp.tool(
     description="Check if a specific version of a Maven artifact exists in Maven Central"
 )
@@ -44,7 +39,23 @@ def check_maven_version(dependency: str, version: str, packaging: str = "jar", c
         packaging: Package type (jar, war, etc.), defaults to "jar"
         classifier: Optional classifier
     """
-    return version_exist_check(dependency, version, packaging, classifier)
+    # Use the consolidated check_version but extract only the exists property
+    result = check_version(dependency, version, packaging, classifier)
+    
+    # Convert the response to match the original format
+    if result["status"] == "success":
+        # Just return the exists field to maintain the same response format
+        exists_result = {
+            "tool_name": "check_version",
+            "status": "success",
+            "result": {
+                "exists": result["result"]["exists"]
+            }
+        }
+        return exists_result
+    
+    # If there was an error, pass through the error response
+    return result
 
 @mcp.tool(
     description="Get the latest version of a Maven artifact from Maven Central"
@@ -73,8 +84,28 @@ def find_maven_version(dependency: str, version: str, target_component: str, pac
         classifier: Optional classifier
     """
     logger.info(f"MCP call to find_maven_version with: {dependency}, {version}, {target_component}")
-    result = find_version(dependency, version, target_component, packaging, classifier)
-    logger.info(f"Result: {result}")
+    
+    # Use the consolidated check_version tool to get all version data
+    result = check_version(dependency, version, packaging, classifier)
+    
+    # Extract the specific component version from the result
+    if result["status"] == "success" and "latest_versions" in result["result"]:
+        component_version = result["result"]["latest_versions"].get(target_component)
+        
+        # Format the response to match the original format
+        if component_version:
+            find_result = {
+                "tool_name": "find_version",
+                "status": "success",
+                "result": {
+                    "latest_version": component_version
+                }
+            }
+            logger.info(f"Result: {component_version}")
+            return find_result
+    
+    # If there was an error or the structure isn't as expected, log and return an error
+    logger.error(f"Error finding version for component: {target_component}")
     return result
 
 # Register new consolidated tools
