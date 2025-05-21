@@ -1,4 +1,4 @@
-# MCP Server Spec - maven-mcp-server
+# MCP Server Spec - mvn-mcp-server
 
 > A minimal MCP server implementation to serve as a learning example and sanity check.
 

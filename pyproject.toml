@@ -1,5 +1,5 @@
 [project]
-name = "maven-mcp-server"
+name = "mvn-mcp-server"
 version = "0.1.0"
 description = "A MCP server for Maven dependency version checking"
 authors = [
@@ -22,7 +22,7 @@ dependencies = [
 ]
 
 [project.scripts]
-maven-mcp-server = "maven_mcp_server.main:main"
+mvn-mcp-server = "mvn_mcp_server.main:main"
 
 [build-system]
 requires = ["setuptools>=42", "wheel"]
@@ -32,4 +32,12 @@ build-backend = "setuptools.build_meta"
 package-dir = {"" = "src"}
 
 [tool.pytest]
-testpaths = ["src/maven_mcp_server/tests"]
+testpaths = ["src/mvn_mcp_server/tests"]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "flake8",
+    "mypy"
+]
