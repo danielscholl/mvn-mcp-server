@@ -1,11 +1,11 @@
 {
   "mcpServers": {
-    "maven-mcp-server": {
+    "mvn-mcp-server": {
       "type": "stdio",
       "command": "uv",
       "args": [
         "run",
-        "maven-mcp-server"
+        "mvn-mcp-server"
       ],
       "env": {}
     }

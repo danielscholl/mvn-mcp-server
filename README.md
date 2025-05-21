@@ -15,7 +15,7 @@ cd mvn-mcp-server
 uv sync
 
 # Install the package in development mode
-uv pip install -e .
+uv pip install -e '.[dev]'
 
 # Run tests to verify installation
 uv run pytest
@@ -23,17 +23,23 @@ uv run pytest
 
 ### MCP Configuration
 
+To utilize this MCP server directly in other projects either use the buttons to install in VSCode, edit the `.mcp.json` file directory.
+
+> Clients tend to have slighty different configurations
+
+[![Install with UV in VS Code](https://img.shields.io/badge/VS_Code-UV-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://vscode.dev/redirect?url=vscode:mcp/install?%7B%22name%22%3A%22mvn-mcp-server%22%2C%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22run%22%2C%22mvn-mcp-server%22%5D%2C%22env%22%3A%7B%7D%7D)   [![Install with Docker in VS Code](https://img.shields.io/badge/VS_Code-Docker-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://vscode.dev/redirect?url=vscode:mcp/install?%7B%22name%22%3A%22mvn-mcp-server%22%2C%22command%22%3A%22docker%22%2C%22args%22%3A%5B%22run%22%2C%22-i%22%2C%22--rm%22%2C%22--mount%22%2C%22type%3Dbind%2Csource%3D%3CYOUR_WORKSPACE_PATH%3E%2Ctarget%3D%2Fworkspace%22%2C%22danielscholl%2Fmvn-mcp-server%22%5D%2C%22env%22%3A%7B%7D%7D)
+
 To use this MCP server in your projects, add the following to your `.mcp.json` file:
 
 ```json
 {
   "mcpServers": {
-    "maven-mcp-server": {
+    "mvn-mcp-server": {
       "type": "stdio",
       "command": "uv",
       "args": [
         "run",
-        "maven-mcp-server"
+        "mvn-mcp-server"
       ],
       "env": {}
     }
@@ -49,7 +55,7 @@ This MCP server provides three core tools for working with Maven dependencies:
 
 A comprehensive tool that checks a Maven version and provides all related version update information in a single call.
 
-**Tool Name:** `maven-mcp-server__check_version_tool`
+**Tool Name:** `mvn-mcp-server__check_version_tool`
 
 **Parameters:**
 - `dependency`: Maven dependency in format `groupId:artifactId` (e.g., "org.springframework:spring-core")
@@ -61,13 +67,13 @@ A comprehensive tool that checks a Maven version and provides all related versio
 
 ```python
 # Through the Claude Code assistant:
-mcp__maven-mcp-server__check_version_tool(
+mcp__mvn-mcp-server__check_version_tool(
     dependency="org.springframework:spring-core",
     version="5.3.10"
 )
 
 # With optional parameters:
-mcp__maven-mcp-server__check_version_tool(
+mcp__mvn-mcp-server__check_version_tool(
     dependency="org.springframework:spring-core",
     version="5.3.10",
     packaging="jar",
@@ -103,7 +109,7 @@ mcp__maven-mcp-server__check_version_tool(
 
 A batch processing tool that checks multiple Maven dependency versions in a single request.
 
-**Tool Name:** `maven-mcp-server__check_version_batch_tool`
+**Tool Name:** `mvn-mcp-server__check_version_batch_tool`
 
 **Parameters:**
 - `dependencies`: A list of dependency objects, each containing:
@@ -116,7 +122,7 @@ A batch processing tool that checks multiple Maven dependency versions in a sing
 
 ```python
 # Through the Claude Code assistant:
-mcp__maven-mcp-server__check_version_batch_tool(
+mcp__mvn-mcp-server__check_version_batch_tool(
     dependencies=[
         {
             "dependency": "org.springframework:spring-core",
@@ -217,7 +223,7 @@ mcp__maven-mcp-server__check_version_batch_tool(
 
 A tool that provides structured information about all available versions of a Maven dependency, grouped by minor version tracks.
 
-**Tool Name:** `maven-mcp-server__list_available_versions_tool`
+**Tool Name:** `mvn-mcp-server__list_available_versions_tool`
 
 **Parameters:**
 - `dependency`: Maven dependency in format `groupId:artifactId` (e.g., "org.springframework:spring-core")
@@ -231,20 +237,20 @@ A tool that provides structured information about all available versions of a Ma
 ```python
 # Through the Claude Code assistant:
 # Basic usage - Get latest versions per track
-mcp__maven-mcp-server__list_available_versions_tool(
+mcp__mvn-mcp-server__list_available_versions_tool(
     dependency="org.springframework:spring-core",
     version="5.3.10"
 )
 
 # Include all versions in each track
-mcp__maven-mcp-server__list_available_versions_tool(
+mcp__mvn-mcp-server__list_available_versions_tool(
     dependency="org.springframework:spring-core",
     version="5.3.10",
     include_all_versions=True
 )
 
 # With optional parameters
-mcp__maven-mcp-server__list_available_versions_tool(
+mcp__mvn-mcp-server__list_available_versions_tool(
     dependency="org.springframework:spring-core",
     version="5.3.10",
     packaging="jar",
@@ -336,7 +342,7 @@ Common error codes include:
 uv run pytest
 
 # Run specific tests
-uv run pytest src/maven_mcp_server/tests/tools/test_check_version.py
+uv run pytest src/mvn_mcp_server/tests/tools/test_check_version.py
 ```
 
 ### Architecture
