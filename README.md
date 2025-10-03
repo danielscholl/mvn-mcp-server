@@ -19,41 +19,30 @@ A Model Context Protocol (MCP) server that enables AI assistants to interact wit
 - [Architecture Design Decisions](docs/adr/index.md) - ADR catalog with decision rationale
 - [AI Evolution Log](AI_EVOLUTION.md) - Project evolution story for AI understanding
 
-## Setup
+## Installation
 
-### Installation
+### Published Release (Recommended)
+
+Install the latest stable release from PyPI:
 
 ```bash
-# Clone the repository
-git clone https://github.com/danielscholl/mvn-mcp-server.git
-cd mvn-mcp-server
+# Using pip
+pip install mvn-mcp-server
 
-# Install dependencies
-uv sync
-
-# Install the package in development mode
-uv pip install -e '.[dev]'
-
-# Run tests to verify installation
-uv run pytest
+# Using uv (recommended)
+uv pip install mvn-mcp-server
 ```
 
-### MCP Configuration
+**MCP Configuration:**
 
-Add the Maven MCP Server to your MCP client configuration (`.mcp.json`):
+Add to your MCP settings file (`.mcp.json` or Claude Desktop config):
 
 ```json
 {
   "mcpServers": {
     "mvn-mcp-server": {
-      "type": "stdio",
       "command": "uvx",
-      "args": [
-        "--from",
-        "git+https://github.com/danielscholl/mvn-mcp-server@main",
-        "mvn-mcp-server"
-      ],
-      "env": {}
+      "args": ["mvn-mcp-server"]
     }
   }
 }
@@ -61,7 +50,44 @@ Add the Maven MCP Server to your MCP client configuration (`.mcp.json`):
 
 **VS Code Quick Install:**
 
-[![Install with UV in VS Code](https://img.shields.io/badge/VS_Code-UV-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://vscode.dev/redirect?url=vscode:mcp/install?%7B%22name%22%3A%22mvn-mcp-server%22%2C%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22--from%22%2C%22git%2Bhttps%3A%2F%2Fgithub.com%2Fazure%2Fosdu-mvn-mcp%40main%22%2C%22mvn-mcp-server%22%5D%2C%22env%22%3A%7B%7D%7D)
+[![Install with UV in VS Code](https://img.shields.io/badge/VS_Code-Install-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://vscode.dev/redirect?url=vscode:mcp/install?%7B%22name%22%3A%22mvn-mcp-server%22%2C%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22mvn-mcp-server%22%5D%7D)
+
+### Development/Latest (From GitHub)
+
+To use the latest unreleased version from the main branch:
+
+**MCP Configuration:**
+
+```json
+{
+  "mcpServers": {
+    "mvn-mcp-server": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/danielscholl/mvn-mcp-server@main",
+        "mvn-mcp-server"
+      ]
+    }
+  }
+}
+```
+
+**Or clone for development:**
+
+```bash
+git clone https://github.com/danielscholl/mvn-mcp-server.git
+cd mvn-mcp-server
+
+# Install dependencies
+uv sync
+
+# Install in development mode
+uv pip install -e '.[dev]'
+
+# Run tests
+uv run pytest
+```
 
 ## Usage
 
@@ -245,6 +271,35 @@ The server implements a layered architecture:
 - **Service Layer**: Core functionality for Maven API interactions, caching, and version handling
 - **Tool Layer**: MCP tool implementations that use the service layer
 - **Shared Utilities**: Common utilities for validation and error handling
+
+### Publishing (Maintainers)
+
+Publishing is **fully automated** via Release Please and GitHub Actions:
+
+1. **Make changes** using [Conventional Commits](https://www.conventionalcommits.org/):
+   ```bash
+   git commit -m "feat: add new feature"
+   git commit -m "fix: resolve bug"
+   ```
+
+2. **Push to main** - Release Please automatically:
+   - Creates a release PR with updated CHANGELOG
+   - Bumps version based on commit types
+   - Updates all version files
+
+3. **Merge release PR** - GitHub Actions automatically:
+   - Creates GitHub release
+   - Builds Python package
+   - Publishes to PyPI
+
+4. **Publish to MCP Registry** (manual):
+   ```bash
+   mcp-publisher publish
+   ```
+
+**No manual version bumps or build commands needed!**
+
+See [docs/PUBLISHING.md](docs/PUBLISHING.md) for detailed information.
 
 ## Contributing
 
