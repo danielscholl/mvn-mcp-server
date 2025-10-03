@@ -3,7 +3,8 @@
   "packages": {
     ".": {
       "extra-files": [
-        "server.json"
+        "server.json",
+        "src/mvn_mcp_server/__init__.py"
       ],
       "changelog-sections": [
         {"type": "feat", "section": "✨ Features", "hidden": false},
