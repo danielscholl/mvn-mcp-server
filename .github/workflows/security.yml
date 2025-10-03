@@ -50,7 +50,7 @@ jobs:
 
       - name: Generate SBOM
         run: |
-          uv run cyclonedx-py -o sbom.json
+          uv run cyclonedx-py environment -o sbom.json
           echo "SBOM generated successfully"
 
       - name: Upload SBOM artifact
