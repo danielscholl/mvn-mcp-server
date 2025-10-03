@@ -160,7 +160,6 @@ class TestMavenApiService(unittest.TestCase):
             self.api_service.get_all_versions("org.example", "test-artifact")
 
         # Just verify that a ResourceError was raised - specific message is implementation detail
-        pass
 
     @patch("requests.get")
     def test_search_artifacts(self, mock_get):
