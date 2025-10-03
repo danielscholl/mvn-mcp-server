@@ -71,8 +71,6 @@ Add to your MCP settings (`.mcp.json` or Claude Desktop config):
 }
 ```
 
-**That's it!** The server is now available to your AI assistant.
-
 ### First Query
 
 Try asking your AI assistant:
@@ -84,10 +82,6 @@ Or:
 > "Scan my Java project for security vulnerabilities"
 
 ## Requirements
-
-- **Python**: 3.12 or 3.13
-- **Platforms**: Linux, macOS, Windows
-- **Network**: Internet access to Maven Central (repo1.maven.org)
 
 ### Optional: Security Scanning
 
@@ -177,16 +171,6 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
 ## License
 
 This project is licensed under the MIT License - see [LICENSE](LICENSE) for details.
-
----
-
-## About
-
-This project demonstrates AI-first Maven integration through the Model Context Protocol, enabling natural language dependency management powered by FastMCP and optimized for production use.
-
-**Built with**: Python 3.12+ | FastMCP | Pydantic | httpx
-
-**Developed using**: AI-assisted workflows with Claude Code and GitHub Copilot
 
 ---
 
