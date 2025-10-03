@@ -2,6 +2,9 @@
   "release-type": "python",
   "packages": {
     ".": {
+      "extra-files": [
+        "server.json"
+      ],
       "changelog-sections": [
         {"type": "feat", "section": "✨ Features", "hidden": false},
         {"type": "fix", "section": "🐛 Bug Fixes", "hidden": false},
