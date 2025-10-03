@@ -132,9 +132,9 @@ Returns: CVE findings, severity breakdown, affected dependencies, fix recommenda
 
 | Prompt | Description |
 |--------|-------------|
+| **list_mcp_assets_prompt** | Show all capabilities with examples |
 | **triage** | Complete dependency and vulnerability analysis |
 | **plan** | Generate actionable remediation plan |
-| **list_mcp_assets** | Show all capabilities with examples |
 
 ## Documentation
 
@@ -261,8 +261,7 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
 ## Support
 
 - **Issues**: [GitHub Issues](https://github.com/danielscholl/mvn-mcp-server/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/danielscholl/mvn-mcp-server/discussions)
-- **Security**: See [SECURITY.md](SECURITY.md)
+- **Questions**: Open an issue with the `question` label
 
 ## License
 
