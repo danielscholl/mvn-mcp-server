@@ -1,0 +1,109 @@
+{
+  "name": "mvn-mcp-server",
+  "version": "0.2.0",
+  "description": "Model Context Protocol server for Maven Central dependency management, version checking, and security scanning",
+  "homepage": "https://github.com/danielscholl/mvn-mcp-server",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/danielscholl/mvn-mcp-server.git"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Daniel Scholl"
+  },
+  "runtime": {
+    "type": "stdio",
+    "command": "uvx",
+    "args": ["mvn-mcp-server"],
+    "env": {}
+  },
+  "tools": [
+    {
+      "name": "check_version_tool",
+      "description": "Check a Maven version and get all version update information in a single call"
+    },
+    {
+      "name": "check_version_batch_tool",
+      "description": "Process multiple Maven dependency version checks in a single batch request"
+    },
+    {
+      "name": "list_available_versions_tool",
+      "description": "List all available versions of a Maven artifact grouped by minor version tracks"
+    },
+    {
+      "name": "scan_java_project_tool",
+      "description": "Scan Java Maven projects for security vulnerabilities using Trivy"
+    },
+    {
+      "name": "analyze_pom_file_tool",
+      "description": "Analyze a single Maven POM file for dependencies and vulnerabilities"
+    }
+  ],
+  "prompts": [
+    {
+      "name": "list_mcp_assets_prompt",
+      "description": "Comprehensive overview of all server capabilities with examples"
+    },
+    {
+      "name": "triage",
+      "description": "Analyze dependencies and create comprehensive vulnerability triage report",
+      "arguments": [
+        {
+          "name": "service_name",
+          "description": "Name of the service to analyze",
+          "required": true
+        },
+        {
+          "name": "workspace",
+          "description": "Path to the workspace directory",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "plan",
+      "description": "Create actionable remediation plan from triage results with full traceability",
+      "arguments": [
+        {
+          "name": "service_name",
+          "description": "Name of the service to plan updates for",
+          "required": true
+        },
+        {
+          "name": "priorities",
+          "description": "List of priority levels to focus on",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "uri": "triage://reports/{service_name}/latest",
+      "description": "Latest vulnerability triage report for a service"
+    },
+    {
+      "uri": "plans://updates/{service_name}/latest",
+      "description": "Current update plan for a service"
+    },
+    {
+      "uri": "assets://server/capabilities",
+      "description": "Dynamic list of server capabilities"
+    }
+  ],
+  "categories": [
+    "development",
+    "security",
+    "dependencies",
+    "maven",
+    "java"
+  ],
+  "tags": [
+    "maven",
+    "dependency-management",
+    "security-scanning",
+    "java",
+    "vulnerabilities",
+    "version-checking"
+  ]
+}
