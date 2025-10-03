@@ -78,14 +78,22 @@ class TestMCPServerIntegration:
                 {"dependency": "org.springframework:spring-core", "version": "5.3.0"},
             )
 
+            # Handle both list and CallToolResult formats
+            if hasattr(result, "content"):
+                # CallToolResult object
+                content = result.content
+            else:
+                # List of content
+                content = result
+
             # Should return content
-            assert len(result) > 0
-            assert isinstance(result[0], TextContent)
+            assert len(content) > 0
+            assert isinstance(content[0], TextContent)
 
             # Parse the JSON response
             import json
 
-            response_data = json.loads(result[0].text)
+            response_data = json.loads(content[0].text)
 
             # Check response structure
             assert "tool_name" in response_data
@@ -226,13 +234,21 @@ class TestMCPServerIntegration:
                 },
             )
 
+            # Handle both list and CallToolResult formats
+            if hasattr(result, "content"):
+                # CallToolResult object
+                content = result.content
+            else:
+                # List of content
+                content = result
+
             # Should return batch results
-            assert len(result) > 0
-            assert isinstance(result[0], TextContent)
+            assert len(content) > 0
+            assert isinstance(content[0], TextContent)
 
             import json
 
-            response_data = json.loads(result[0].text)
+            response_data = json.loads(content[0].text)
 
             assert response_data["status"] == "success"
             assert "result" in response_data
