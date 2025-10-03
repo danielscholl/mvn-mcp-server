@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "mvn-mcp-server": {
+      "type": "stdio",
+      "command": "uv",
+      "args": [
+        "run",
+        "mvn-mcp-server"
+      ],
+      "env": {}
+    }
+  }
+}
