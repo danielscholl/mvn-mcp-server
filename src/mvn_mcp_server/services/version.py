@@ -92,7 +92,10 @@ class VersionService:
                 )
                 return [year, month, day]
         except (ValueError, IndexError):
-            logger.debug(f"Failed to parse calendar version from '{base_version}'.", exc_info=True)
+            logger.debug(
+                f"Failed to parse calendar version from '{base_version}'.",
+                exc_info=True,
+            )
 
         return None
 
