@@ -129,13 +129,6 @@ graph LR
     B -->|Structured Response| A
 ```
 
-The server:
-1. Translates natural language to Maven API calls
-2. Queries Maven Central for version/dependency data
-3. Optionally scans with Trivy for vulnerabilities
-4. Returns comprehensive, AI-optimized responses
-5. Caches results for efficiency
-
 ## Support
 
 - **Issues**: [GitHub Issues](https://github.com/danielscholl/mvn-mcp-server/issues)
