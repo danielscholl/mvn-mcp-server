@@ -5,6 +5,12 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      publish_to_pypi:
+        description: "Publish current release to PyPI"
+        required: true
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -15,6 +21,7 @@ permissions:
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    if: github.event_name == 'push'
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
       tag_name: ${{ steps.release.outputs.tag_name }}
@@ -25,45 +32,77 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
-          
-  # Build and publish package when a release is created
-  build-and-publish:
-    needs: release-please
-    if: ${{ needs.release-please.outputs.release_created }}
+
+  # Automatic publish when a release is created
+  auto-publish:
     runs-on: ubuntu-latest
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
     environment:
       name: pypi
       url: https://pypi.org/p/mvn-mcp-server
     steps:
       - uses: actions/checkout@v5
-      
+
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-          
+
       - name: Install uv
         uses: astral-sh/setup-uv@v6
-        
-      - name: Create virtual environment
-        run: uv venv
-        
+
       - name: Build package
         run: |
           uv pip install build
           uv run python -m build
-          
+
       - name: Validate built distributions
         run: |
           echo "Built packages:"
           ls -la dist/
-          
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: python-packages-${{ needs.release-please.outputs.tag_name }}
           path: dist/
           retention-days: 90
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          skip-existing: true
+          verbose: true
+          print-hash: true
+
+  # Manual publish via workflow dispatch (for fixing failures)
+  manual-publish:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.publish_to_pypi == 'true'
+    environment:
+      name: pypi
+      url: https://pypi.org/p/mvn-mcp-server
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Build package
+        run: |
+          uv pip install build
+          uv run python -m build
+
+      - name: Validate built distributions
+        run: |
+          echo "Built packages:"
+          ls -la dist/
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
