@@ -28,12 +28,8 @@ AI: ✅ Found 3 critical CVEs, 12 outdated dependencies
     🎯 Ready to implement
 ```
 
-**Benefits:**
-- **Natural language** instead of complex Maven commands
-- **Single workflow** combining version checks + security + planning
-- **AI-assisted** decision making with full context
-- **Intelligent caching** for faster repeated queries
-- **Enterprise-ready** with audit trails and traceability
+> **Key Benefits:**
+> Natural language instead of complex Maven commands • Single workflow combining version checks + security + planning • AI-assisted decision making with full context • Intelligent caching for faster repeated queries • Enterprise-ready with audit trails and traceability
 
 ## Features
 
@@ -135,14 +131,6 @@ The server:
 3. Optionally scans with Trivy for vulnerabilities
 4. Returns comprehensive, AI-optimized responses
 5. Caches results for efficiency
-
-## Contributing
-
-We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
-- Development setup
-- Testing guidelines
-- Code style requirements
-- Pull request process
 
 ## Support
 
