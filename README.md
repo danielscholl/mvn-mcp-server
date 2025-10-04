@@ -29,7 +29,11 @@ AI: ✅ Found 3 critical CVEs, 12 outdated dependencies
 ```
 
 > **Key Benefits:**
-> Natural language instead of complex Maven commands • Single workflow combining version checks + security + planning • AI-assisted decision making with full context • Intelligent caching for faster repeated queries • Enterprise-ready with audit trails and traceability
+> - Natural language instead of complex Maven commands
+> - Single workflow combining version checks + security + planning
+> - AI-assisted decision making with full context
+> - Intelligent caching for faster repeated queries
+> - Enterprise-ready with audit trails and traceability
 
 ## Features
 
