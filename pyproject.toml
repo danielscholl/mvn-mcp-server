@@ -1,6 +1,6 @@
 [project]
 name = "mvn-mcp-server"
-version = "0.2.0"
+version = "1.0.0"
 description = "A MCP server for Maven dependency version checking"
 authors = [
     {name = "Daniel Scholl"},
