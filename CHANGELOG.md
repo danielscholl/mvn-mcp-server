@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.1.1](https://github.com/danielscholl/mvn-mcp-server/compare/v1.1.0...v1.1.1) (2025-10-04)
+
+
+### ⚙️ Continuous Integration
+
+* **release:** Add --system flag to uv pip install commands ([6f55f19](https://github.com/danielscholl/mvn-mcp-server/commit/6f55f19f64d87eb60559ab310a418bf8ca04d8d3))
+* **release:** Fix build command by removing uv run prefix ([fdff957](https://github.com/danielscholl/mvn-mcp-server/commit/fdff957460654994446915f3fcec049a38438355))
+* **release:** Fix uv build system flag ([4661f29](https://github.com/danielscholl/mvn-mcp-server/commit/4661f29e146704becae93089285c33bd000c6fb4))
+* **release:** Remove uv run prefix from build commands ([f3530ef](https://github.com/danielscholl/mvn-mcp-server/commit/f3530efb56e8a0eca1dfb62c409dce27f0a8a9bf))
+
 ## [1.1.0](https://github.com/danielscholl/mvn-mcp-server/compare/v1.0.0...v1.1.0) (2025-10-04)
 
 
