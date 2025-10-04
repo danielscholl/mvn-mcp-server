@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.0](https://github.com/danielscholl/mvn-mcp-server/compare/v1.0.0...v1.1.0) (2025-10-04)
+
+
+### ✨ Features
+
+* **ci:** Add manual PyPI publish workflow ([73a9614](https://github.com/danielscholl/mvn-mcp-server/commit/73a96144c54dcac9171879239fd8df15cc630e12))
+
+
+### 🔧 Miscellaneous
+
+* **ci:** Add manual PyPI publish workflow with automatic release support ([c71fb48](https://github.com/danielscholl/mvn-mcp-server/commit/c71fb48fec0739195a18b02b9ec40b7de5ecd006))
+
 ## [1.0.0](https://github.com/danielscholl/mvn-mcp-server/compare/v0.2.0...v1.0.0) (2025-10-04)
 
 
