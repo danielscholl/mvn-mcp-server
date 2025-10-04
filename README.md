@@ -117,25 +117,6 @@ Without Trivy, version checking and dependency analysis work normally. Security 
 | **triage** | Complete dependency and vulnerability analysis | `Run triage for my-service` |
 | **plan** | Generate actionable remediation plan | `Create update plan for my-service` |
 
-## Documentation
-
-### For Users
-
-- **[Usage Guide](USAGE.md)** - Detailed examples and workflows
-- **[Project Brief](docs/project-brief.md)** - Design philosophy and goals
-
-### For Developers
-
-- **[Contributing](CONTRIBUTING.md)** - How to contribute
-- **[Architecture](docs/project-architect.md)** - Technical deep-dive
-- **[ADR Catalog](docs/adr/index.md)** - Design decisions
-- **[Publishing](docs/PUBLISHING.md)** - Release process
-
-### Additional Resources
-
-- **[AI Evolution](AI_EVOLUTION.md)** - Project development story
-- **[Product Requirements](docs/project-prd.md)** - Feature specifications
-
 ## How It Works
 
 ```mermaid
@@ -176,6 +157,6 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) for deta
 
 <div align="center">
 
-**[Get Started](#quick-start)** • **[Documentation](#documentation)** • **[Contributing](CONTRIBUTING.md)**
+**[Usage](docs/project-usage.md)** • **[Architecture](docs/project-architect.md)** • **[Contributing](CONTRIBUTING.md)**
 
 </div>

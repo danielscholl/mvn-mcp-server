@@ -123,7 +123,7 @@ uv pip install -e ".[dev]"      # Install package with dev dependencies (include
 - @docs/project-architect.md - System architecture
 - @docs/project-prd.md - Product requirements
 - @docs/project-brief.md - Project overview
-- @AI_EVOLUTION.md - Project evolution story for AI understanding
+- @docs/project-evolution.md - Project evolution story for AI understanding
 - @README.md - Getting started guide
 
 ## Development Guidelines
