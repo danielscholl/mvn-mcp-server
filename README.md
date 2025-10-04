@@ -29,33 +29,20 @@ AI: ✅ Found 3 critical CVEs, 12 outdated dependencies
 ```
 
 **Benefits:**
-- 🗣️ **Natural language** instead of complex Maven commands
-- 🔄 **Single workflow** combining version checks + security + planning
-- 🤖 **AI-assisted** decision making with full context
-- ⚡ **80%+ faster** with intelligent caching
-- 📊 **Enterprise-ready** with audit trails and traceability
+- **Natural language** instead of complex Maven commands
+- **Single workflow** combining version checks + security + planning
+- **AI-assisted** decision making with full context
+- **Intelligent caching** for faster repeated queries
+- **Enterprise-ready** with audit trails and traceability
 
 ## Features
 
-✨ **Version Management**
-- Check single or batch dependency versions
-- Discover available updates (major/minor/patch)
-- List version history grouped by tracks
-
-🔒 **Security Scanning**
-- Integrate Trivy vulnerability scanning
-- CVE detection with severity filtering
-- Multi-module project support
-
-📊 **Enterprise Workflows**
-- Guided dependency triage analysis
-- Actionable remediation planning
-- Complete audit trail with CVE traceability
-
-🚀 **AI-Optimized**
-- Single-call comprehensive responses
-- Batch operations for efficiency
-- Intelligent caching (80%+ hit rate)
+| Category | Capabilities |
+|----------|-------------|
+| **Version Management** | Check single or batch dependency versions • Discover available updates (major/minor/patch) • List version history grouped by tracks |
+| **Security Scanning** | Integrate Trivy vulnerability scanning • CVE detection with severity filtering • Multi-module project support |
+| **Enterprise Workflows** | Guided dependency triage analysis • Actionable remediation planning • Complete audit trail with CVE traceability |
+| **AI-Optimized** | Single-call comprehensive responses • Batch operations for efficiency • Intelligent caching |
 
 ## Quick Start
 
@@ -84,8 +71,6 @@ Add to your MCP settings (`.mcp.json` or Claude Desktop config):
 }
 ```
 
-**That's it!** The server is now available to your AI assistant.
-
 ### First Query
 
 Try asking your AI assistant:
@@ -96,52 +81,23 @@ Or:
 
 > "Scan my Java project for security vulnerabilities"
 
-## What You Can Do
+## Requirements
 
-### Check Dependencies
+### Optional: Security Scanning
 
-```
-Check org.springframework:spring-core version 5.3.0
-```
+Install **Trivy** for vulnerability detection:
 
-Returns: Existence, latest versions (major/minor/patch), update recommendations
+```bash
+# macOS
+brew install trivy
 
-### Batch Operations
-
-```
-Check these dependencies for updates:
-- org.springframework:spring-core 5.3.0
-- junit:junit 4.13.2
-- com.fasterxml.jackson.core:jackson-databind 2.13.0
+# Linux
+# See: https://aquasecurity.github.io/trivy/latest/getting-started/installation/
 ```
 
-Returns: Summary statistics and individual results—all in one response
+Without Trivy, version checking and dependency analysis work normally. Security scanning tools will gracefully report Trivy unavailable.
 
-### Security Scanning
-
-```
-Scan this Java project for vulnerabilities
-```
-
-Returns: CVE findings, severity breakdown, affected dependencies, fix recommendations
-
-### Enterprise Workflows
-
-**Complete dependency management:**
-
-1. **Triage**: `Run dependency triage for my-service`
-   - Scans workspace
-   - Checks for updates
-   - Identifies vulnerabilities
-   - Generates report
-
-2. **Plan**: `Create update plan for my-service`
-   - Prioritizes by severity
-   - Creates implementation phases
-   - Links tasks to CVEs
-   - Provides file locations
-
-3. **Implement**: Follow the plan using individual tools
+**Security Note:** All processing happens locally. No source code or project data is sent to external services (except public Maven Central API queries for version information).
 
 ## Available Tools
 
@@ -160,113 +116,6 @@ Returns: CVE findings, severity breakdown, affected dependencies, fix recommenda
 | **list_mcp_assets_prompt** | Show all capabilities with examples | `What can this server do?` |
 | **triage** | Complete dependency and vulnerability analysis | `Run triage for my-service` |
 | **plan** | Generate actionable remediation plan | `Create update plan for my-service` |
-
-## Documentation
-
-### For Users
-
-- **[Usage Guide](USAGE.md)** - Detailed examples and workflows
-- **[Project Brief](docs/project-brief.md)** - Design philosophy and goals
-
-### For Developers
-
-- **[Contributing](CONTRIBUTING.md)** - How to contribute
-- **[Architecture](docs/project-architect.md)** - Technical deep-dive
-- **[ADR Catalog](docs/adr/index.md)** - Design decisions
-- **[Publishing](docs/PUBLISHING.md)** - Release process
-
-### Additional Resources
-
-- **[AI Evolution](AI_EVOLUTION.md)** - Project development story
-- **[Product Requirements](docs/project-prd.md)** - Feature specifications
-
-## Requirements
-
-### System Requirements
-
-- **Python**: 3.12 or 3.13
-- **Platforms**: Linux, macOS, Windows
-- **Network**: Internet access to Maven Central (repo1.maven.org)
-
-### Security Scanning (Optional)
-
-**Trivy** enables vulnerability detection:
-
-```bash
-# macOS
-brew install trivy
-
-# Linux
-# See: https://aquasecurity.github.io/trivy/latest/getting-started/installation/
-```
-
-**Without Trivy:**
-- Version checking and dependency analysis work normally
-- Security scanning tools gracefully report Trivy unavailable
-- All other features remain fully functional
-
-**Security Note:** All processing happens locally. No source code or project data is sent to external services (except public Maven Central API queries for version information).
-
-## Advanced Installation
-
-<details>
-<summary>Install from GitHub (latest unreleased)</summary>
-
-```json
-{
-  "mcpServers": {
-    "mvn-mcp-server": {
-      "command": "uvx",
-      "args": [
-        "--from",
-        "git+https://github.com/danielscholl/mvn-mcp-server@main",
-        "mvn-mcp-server"
-      ]
-    }
-  }
-}
-```
-
-</details>
-
-<details>
-<summary>Development Setup</summary>
-
-```bash
-# Clone repository
-git clone https://github.com/danielscholl/mvn-mcp-server.git
-cd mvn-mcp-server
-
-# Install dependencies
-uv sync
-
-# Install in development mode
-uv pip install -e '.[dev]'
-
-# Run tests
-uv run pytest
-```
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed development guide.
-
-</details>
-
-## Example Queries
-
-**Version Checking:**
-- "Is Spring Boot 3.2.0 the latest version?"
-- "What's the latest patch version of Log4j 2.17?"
-- "Show me all versions of Commons Lang3"
-
-**Security:**
-- "Scan my project for critical vulnerabilities"
-- "Analyze this pom.xml for security issues"
-- "What CVEs affect my dependencies?"
-
-**Dependency Management:**
-- "Run a complete triage of my-service"
-- "Create an update plan focusing on high-severity issues"
-- "What dependencies are outdated in my project?"
 
 ## How It Works
 
@@ -306,18 +155,8 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) for deta
 
 ---
 
-## About
-
-This project demonstrates AI-first Maven integration through the Model Context Protocol, enabling natural language dependency management powered by FastMCP and optimized for production use.
-
-**Built with**: Python 3.12+ | FastMCP | Pydantic | httpx
-
-**Developed using**: AI-assisted workflows with Claude Code and GitHub Copilot
-
----
-
 <div align="center">
 
-**[Get Started](#quick-start)** • **[Documentation](#documentation)** • **[Contributing](CONTRIBUTING.md)**
+**[Usage](docs/project-usage.md)** • **[Architecture](docs/project-architect.md)** • **[Contributing](CONTRIBUTING.md)**
 
 </div>
