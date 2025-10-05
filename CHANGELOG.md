@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.0.1](https://github.com/danielscholl/mvn-mcp-server/compare/v2.0.0...v2.0.1) (2025-10-05)
+
+
+### 🐛 Bug Fixes
+
+* **ci:** Handle push events in security workflow checkouts ([caaf1e9](https://github.com/danielscholl/mvn-mcp-server/commit/caaf1e98b10cd6a8a01e7961a5e7f037f2c62f2d))
+
+
+### 📚 Documentation
+
+* **readme:** Improve quick start section and installation flow ([#23](https://github.com/danielscholl/mvn-mcp-server/issues/23)) ([f0849ce](https://github.com/danielscholl/mvn-mcp-server/commit/f0849cef54a763707a9f19e0b32d07528af35239))
+
 ## [2.0.0](https://github.com/danielscholl/mvn-mcp-server/compare/v1.1.1...v2.0.0) (2025-10-05)
 
 
