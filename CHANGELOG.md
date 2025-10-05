@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.1.2](https://github.com/danielscholl/mvn-mcp-server/compare/v1.1.1...v1.1.2) (2025-10-05)
+## [2.0.0](https://github.com/danielscholl/mvn-mcp-server/compare/v1.1.1...v2.0.0) (2025-10-05)
 
 
 ### ⚙️ Continuous Integration
