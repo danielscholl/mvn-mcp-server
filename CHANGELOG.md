@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/danielscholl/mvn-mcp-server/compare/v2.0.1...v2.1.0) (2025-10-05)
+
+
+### ✨ Features
+
+* **deps:** Update core dependencies and align documentation ([#24](https://github.com/danielscholl/mvn-mcp-server/issues/24)) ([8c7434c](https://github.com/danielscholl/mvn-mcp-server/commit/8c7434cfd9dde1243891079f7a57892ee8a00921))
+
 ## [2.0.1](https://github.com/danielscholl/mvn-mcp-server/compare/v2.0.0...v2.0.1) (2025-10-05)
 
 
