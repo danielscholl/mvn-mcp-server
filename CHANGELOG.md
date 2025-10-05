@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.2](https://github.com/danielscholl/mvn-mcp-server/compare/v1.1.1...v1.1.2) (2025-10-05)
+
+
+### ⚙️ Continuous Integration
+
+* **security:** Add pull_request_target support for fork PR scanning ([#20](https://github.com/danielscholl/mvn-mcp-server/issues/20)) ([34e72bb](https://github.com/danielscholl/mvn-mcp-server/commit/34e72bb0425dfa053cbd70f253aeabb8f2bfbeb6))
+
 ## [1.1.1](https://github.com/danielscholl/mvn-mcp-server/compare/v1.1.0...v1.1.1) (2025-10-04)
 
 
