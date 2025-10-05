@@ -56,7 +56,7 @@ jobs:
           persist-credentials: false
 
       - name: Checkout repository
-        if: github.event_name == 'pull_request'
+        if: github.event_name != 'pull_request_target'
         uses: actions/checkout@v5
         with:
           fetch-depth: 2
@@ -103,7 +103,7 @@ jobs:
           persist-credentials: false
 
       - name: Checkout repository
-        if: github.event_name == 'pull_request'
+        if: github.event_name != 'pull_request_target'
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
