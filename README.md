@@ -55,7 +55,7 @@ AI: ✅ Found 3 critical CVEs, 12 outdated dependencies
 
 ### Setup
 
-[![Install with UV in VS Code](https://img.shields.io/badge/VS_Code-UV-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://vscode.dev/redirect?url=vscode:mcp/install?%7B%22name%22%3A%22mvn-mcp-server%22%2C%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22mvn-mcp-server%22%5D%2C%22env%22%3A%7B%7D%7D) 
+[![Install with UV in VS Code](https://img.shields.io/badge/VS_Code-UV-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://vscode.dev/redirect?url=vscode:mcp/install?%7B%22name%22%3A%22mvn-mcp-server%22%2C%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22mvn-mcp-server%22%5D%2C%22env%22%3A%7B%7D%7D)
 
 
 ```bash
