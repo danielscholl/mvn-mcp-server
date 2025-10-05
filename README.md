@@ -22,7 +22,7 @@ mvn versions:display-dependency-updates  # Check all dependencies
 
 **With Maven MCP Server:**
 ```
-You: "Scan my-service for vulnerabilities and create an update plan"
+You: "Scan this project for vulnerabilities and create an update plan"
 AI: ✅ Found 3 critical CVEs, 12 outdated dependencies
     📋 Created prioritized update plan with file locations
     🎯 Ready to implement
@@ -46,19 +46,23 @@ AI: ✅ Found 3 critical CVEs, 12 outdated dependencies
 
 ## Quick Start
 
-### Installation
+**Prerequisites:**
+
+- [Python 3.12+](https://www.python.org/downloads/)
+- [uv](https://docs.astral.sh/uv/getting-started/installation/)
+- [trivy](https://trivy.dev) (optional)
+
+
+### Setup
+
+[![Install with UV in VS Code](https://img.shields.io/badge/VS_Code-UV-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://vscode.dev/redirect?url=vscode:mcp/install?%7B%22name%22%3A%22mvn-mcp-server%22%2C%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22mvn-mcp-server%22%5D%2C%22env%22%3A%7B%7D%7D)
+
 
 ```bash
-# Install from PyPI
-pip install mvn-mcp-server
-
-# Or using uv (recommended)
-uv pip install mvn-mcp-server
+mcp add mvn-mcp-server -- uvx mvn-mcp-server
 ```
 
-### Configuration
-
-Add to your MCP settings (`.mcp.json` or Claude Desktop config):
+Or add manually to your MCP configuration:
 
 ```json
 {
@@ -71,17 +75,13 @@ Add to your MCP settings (`.mcp.json` or Claude Desktop config):
 }
 ```
 
-### First Query
 
-Try asking your AI assistant:
+### Try It
 
 > "Check if Spring Core 5.3.0 has any updates available"
 
-Or:
-
 > "Scan my Java project for security vulnerabilities"
 
-## Requirements
 
 ### Optional: Security Scanning
 
@@ -128,11 +128,6 @@ graph LR
     D -->|CVE Data| B
     B -->|Structured Response| A
 ```
-
-## Support
-
-- **Issues**: [GitHub Issues](https://github.com/danielscholl/mvn-mcp-server/issues)
-- **Questions**: Open an issue with the `question` label
 
 ## License
 
