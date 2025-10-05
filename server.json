@@ -1,6 +1,6 @@
 {
   "name": "mvn-mcp-server",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Model Context Protocol server for Maven Central dependency management, version checking, and security scanning",
   "homepage": "https://github.com/danielscholl/mvn-mcp-server",
   "repository": {
