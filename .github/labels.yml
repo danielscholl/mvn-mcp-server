@@ -73,8 +73,8 @@
   color: c5def5
   description: Architecture Decision Record needed or updated
 
-# Service Labels (Which OSDU service)
-  
+# Component Labels (Specific areas)
+
 
 # Status Labels (Current state)
 - name: help wanted

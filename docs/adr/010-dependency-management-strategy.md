@@ -7,9 +7,9 @@
 During initial setup and testing, we discovered that the project's dependencies needed refinement. The original imports referenced `mcp.server.fastmcp` which doesn't exist in the current FastMCP package structure. Additionally, we needed to clarify our HTTP client strategy.
 
 ## Decision
-1. Use **FastMCP** (>=2.0.0) as the primary MCP framework dependency
-2. Use **httpx** (>=0.27.0) as the primary HTTP client for Maven Central API calls
-3. Maintain **requests** (>=2.32.3) for compatibility with existing code
+1. Use **FastMCP** (>=2.12.4) as the primary MCP framework dependency
+2. Use **httpx** (>=0.28.1) as the primary HTTP client for Maven Central API calls
+3. Maintain **requests** (>=2.32.5) for compatibility with existing code
 4. Use direct imports from `fastmcp` package (not nested paths)
 
 ## Rationale
@@ -17,7 +17,7 @@ During initial setup and testing, we discovered that the project's dependencies 
 ### FastMCP vs MCP
 - FastMCP is the actively maintained framework that provides the features we need
 - The `mcp` package alone doesn't provide the server framework capabilities
-- FastMCP 2.0+ has stable APIs and better exception handling
+- FastMCP 2.12+ provides stable APIs, prompts, resources, and improved exception handling
 
 ### Import Pattern
 - The correct import is `from fastmcp import FastMCP`, not `from mcp.server.fastmcp`
@@ -58,17 +58,17 @@ import requests  # For compatibility
 ### pyproject.toml Dependencies
 ```toml
 dependencies = [
-    "fastmcp>=2.0.0",
-    "pydantic>=2.11.4",
-    "requests>=2.32.3",
-    "httpx>=0.27.0",
+    "fastmcp>=2.12.4",
+    "pydantic>=2.11.10",
+    "requests>=2.32.5",
+    "httpx>=0.28.1",
 ]
 ```
 
 ## Migration Guide
 When updating existing code:
 1. Replace `from mcp.server.fastmcp` with `from fastmcp`
-2. Ensure FastMCP version is >=2.0.0
+2. Ensure FastMCP version is >=2.12.4 for prompts and resources support
 3. Add httpx to dependencies if using MavenApiService
 
 ## References

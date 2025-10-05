@@ -117,18 +117,6 @@ Without Trivy, version checking and dependency analysis work normally. Security 
 | **triage** | Complete dependency and vulnerability analysis | `Run triage for my-service` |
 | **plan** | Generate actionable remediation plan | `Create update plan for my-service` |
 
-## How It Works
-
-```mermaid
-graph LR
-    A[AI Assistant] -->|Natural Language| B[MCP Server]
-    B -->|API Calls| C[Maven Central]
-    B -->|Security Scan| D[Trivy]
-    C -->|Version Data| B
-    D -->|CVE Data| B
-    B -->|Structured Response| A
-```
-
 ## License
 
 This project is licensed under the MIT License - see [LICENSE](LICENSE) for details.
@@ -137,6 +125,6 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) for deta
 
 <div align="center">
 
-**[Usage](docs/project-usage.md)** • **[Architecture](docs/project-architect.md)** • **[Contributing](CONTRIBUTING.md)**
+**[Usage](https://github.com/danielscholl/mvn-mcp-server/blob/main/docs/project-usage.md)** • **[Architecture](https://github.com/danielscholl/mvn-mcp-server/blob/main/docs/project-architect.md)** • **[Contributing](https://github.com/danielscholl/mvn-mcp-server/blob/main/CONTRIBUTING.md)**
 
 </div>

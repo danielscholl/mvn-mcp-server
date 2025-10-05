@@ -4,7 +4,7 @@
 **Accepted** - 2025-05-15
 
 ## Context
-We need to implement an MCP (Model Context Protocol) server to expose OSDU functionality to AI assistants. The implementation must be reliable, maintainable, and allow for rapid development while ensuring protocol compliance.
+We need to implement an MCP (Model Context Protocol) server to provide Maven dependency management capabilities to AI assistants. The implementation must be reliable, maintainable, and allow for rapid development while ensuring protocol compliance.
 
 ## Decision
 Use **FastMCP** framework for implementing the MCP server.
@@ -44,7 +44,7 @@ Use **FastMCP** framework for implementing the MCP server.
 # Simple tool registration pattern
 from fastmcp import FastMCP
 
-mcp = FastMCP("Maven MCP Server")
+mcp = FastMCP("mvn MCP Server")
 
 @mcp.tool()
 def check_version(dependency: str, version: str) -> dict:

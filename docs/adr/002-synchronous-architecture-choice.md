@@ -9,14 +9,14 @@ When implementing the Maven MCP Server, we needed to decide between an asynchron
 The FastMCP framework supports both patterns, and Maven Central API calls are I/O-bound operations that could benefit from async handling.
 
 ## Decision
-Use **synchronous (non-async)** implementation throughout the entire codebase.
+Use **synchronous (non-async)** implementation for tools and services. Prompts and resources use async as required by FastMCP framework.
 
 ## Rationale
 1. **Maven Operations are Sequential**: Most Maven operations follow a sequential pattern (check existence → fetch metadata → parse versions)
-2. **Simplicity**: Synchronous code is easier to understand, debug, and maintain
-3. **No Concurrency Requirements**: MCP servers typically handle one request at a time from the AI assistant
-4. **Framework Alignment**: FastMCP's examples and patterns favor synchronous implementation
-5. **Error Handling**: Synchronous error handling is more straightforward with try/catch blocks
+2. **Simplicity**: Synchronous code is easier to understand, debug, and maintain for core tool logic
+3. **No Concurrency Requirements**: Individual tool calls don't benefit from async patterns
+4. **Hybrid Architecture**: FastMCP requires async for prompts/resources but allows sync for tools
+5. **Error Handling**: Synchronous error handling is more straightforward with try/catch blocks for business logic
 
 ## Alternatives Considered
 1. **Full Async Implementation**
@@ -38,10 +38,12 @@ Use **synchronous (non-async)** implementation throughout the entire codebase.
 - Standard exception handling patterns
 
 **Negative:**
-- Limited concurrent request handling
+- Limited concurrent request handling in tools
 - Potential blocking on slow Maven Central responses
-- Cannot leverage async benefits if scale requirements change
+- Hybrid codebase with both sync (tools) and async (prompts/resources) patterns
 - Sequential processing of batch operations
+
+**Note:** Prompts and Resources use async as required by FastMCP framework for proper state management and MCP protocol compliance.
 
 ## Implementation Example
 ```python

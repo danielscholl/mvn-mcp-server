@@ -50,10 +50,10 @@ This document covers:
 
 ### 2.3. Technology Stack
 - **Runtime**: Python 3.12+
-- **MCP Framework**: FastMCP (>=2.0.0)
+- **MCP Framework**: FastMCP (>=2.12.4)
 - **Validation**: Pydantic v2
-- **HTTP Client**: httpx (>=0.27.0) - direct dependency for Maven Central API
-- **HTTP Library**: requests (>=2.32.3) - for compatibility
+- **HTTP Client**: httpx (>=0.28.1) - direct dependency for Maven Central API
+- **HTTP Library**: requests (>=2.32.5) - for compatibility
 - **Testing**: pytest with unittest.mock
 - **Package Management**: UV
 
@@ -125,7 +125,28 @@ This document covers:
 └─────────────────────────────────────────┘
 ```
 
-### 3.2. Component Structure
+### 3.2. External Integration Flow
+
+The following diagram illustrates how data flows between the AI assistant, MCP server, and external services:
+
+```mermaid
+graph LR
+    A[AI Assistant] -->|Natural Language| B[MCP Server]
+    B -->|API Calls| C[Maven Central]
+    B -->|Security Scan| D[Trivy]
+    C -->|Version Data| B
+    D -->|CVE Data| B
+    B -->|Structured Response| A
+```
+
+**Key Integration Points:**
+- **Maven Central API**: Version metadata, dependency search, artifact availability
+- **Trivy Scanner**: Security vulnerability detection and CVE analysis
+- **AI Assistant**: Natural language queries and structured responses
+
+All processing happens locally - only Maven Central API queries are sent to external services.
+
+### 3.3. Component Structure
 
 ```
 mvn_mcp_server/
