@@ -100,10 +100,34 @@ def _extract_module_paths_for_profile(
                 for module in modules:
                     if module.text:
                         module_path = parent_dir / module.text
-                        if module_path.exists() and module_path.is_dir():
-                            module_paths.append(module_path)
-                        else:
-                            logger.warning(f"Module directory not found: {module_path}")
+
+                        # Validate that resolved path stays within parent directory
+                        try:
+                            resolved_module = module_path.resolve()
+                            resolved_parent = parent_dir.resolve()
+
+                            # Check path traversal - ensure module is within parent
+                            if not str(resolved_module).startswith(
+                                str(resolved_parent) + os.sep
+                            ):
+                                # Also check if it's exactly the parent (edge case)
+                                if resolved_module != resolved_parent:
+                                    logger.warning(
+                                        f"Module path escapes parent directory: {module_path} -> {resolved_module}"
+                                    )
+                                    continue
+
+                            if resolved_module.exists() and resolved_module.is_dir():
+                                module_paths.append(resolved_module)
+                            else:
+                                logger.warning(
+                                    f"Module directory not found: {module_path}"
+                                )
+                        except Exception as e:
+                            logger.warning(
+                                f"Error resolving module path '{module_path}': {e}"
+                            )
+                            continue
 
                 if module_paths:
                     logger.info(
@@ -320,10 +344,16 @@ def _extract_module_name_from_pom_path(pom_file: str) -> str:
         "provider/partition-azure/pom.xml" -> "provider/partition-azure"
         "pom.xml" -> "."
     """
-    module_name = pom_file.replace("/pom.xml", "").replace("pom.xml", ".")
-    if module_name == "":
-        module_name = "."
-    return module_name
+    path = Path(pom_file)
+
+    # If the file is named pom.xml, return the parent directory
+    if path.name == "pom.xml":
+        parent = path.parent
+        # If parent is current directory, return "."
+        return "." if str(parent) in ("", ".") else str(parent)
+
+    # If not a pom.xml file, return the path as-is
+    return pom_file
 
 
 def _build_module_summary(
