@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.0](https://github.com/danielscholl/mvn-mcp-server/compare/v2.2.2...v2.3.0) (2025-10-15)
+
+
+### ✨ Features
+
+* **security:** Add per-module vulnerability tracking and severity filtering ([#34](https://github.com/danielscholl/mvn-mcp-server/issues/34)) ([07aaebf](https://github.com/danielscholl/mvn-mcp-server/commit/07aaebf482febcbebcbdbbe7e9edc16192d31376))
+
 ## [2.2.2](https://github.com/danielscholl/mvn-mcp-server/compare/v2.2.1...v2.2.2) (2025-10-15)
 
 
