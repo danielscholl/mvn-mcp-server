@@ -235,11 +235,20 @@ def list_available_versions_tool(
 )
 def scan_java_project_tool(
     workspace: str,
-    include_profiles: Annotated[Optional[List[str]], Field(default=None, description="List of Maven profiles to activate")] = None,
+    include_profiles: Annotated[
+        Optional[List[str]],
+        Field(default=None, description="List of Maven profiles to activate"),
+    ] = None,
     scan_all_modules: bool = True,
     scan_mode: str = "workspace",
     pom_file: Optional[str] = None,
-    severity_filter: Annotated[Optional[List[str]], Field(default=None, description="List of severity levels to include (CRITICAL, HIGH, MEDIUM, LOW)")] = None,
+    severity_filter: Annotated[
+        Optional[List[str]],
+        Field(
+            default=None,
+            description="List of severity levels to include (CRITICAL, HIGH, MEDIUM, LOW)",
+        ),
+    ] = None,
     max_results: int = 100,
     offset: int = 0,
 ):
