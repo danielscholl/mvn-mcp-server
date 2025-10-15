@@ -1,7 +1,7 @@
 """Java security scanning tool for Maven projects.
 
 This module implements security scanning for Java projects using Trivy.
-Supports profile-based scanning by directly scanning child POMs specified in profiles.
+Supports profile-based scanning by generating and scanning effective POMs for child modules specified in profiles.
 """
 
 import os
@@ -9,10 +9,11 @@ import subprocess
 import json
 import logging
 import tempfile
-import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Dict, Any, Optional, List
 from collections import defaultdict
+
+import defusedxml.ElementTree as ET
 
 from fastmcp.exceptions import ValidationError, ToolError, ResourceError
 
@@ -438,6 +439,34 @@ def _build_affected_modules(
     return affected
 
 
+def _compile_module_outputs(
+    all_results: List[JavaVulnerability], severity_filter: List[str]
+) -> tuple[Dict[str, Any], List[Any]]:
+    """Compile module summary and affected modules from scan results.
+
+    This is a shared helper to reduce duplication between different scan paths.
+
+    Args:
+        all_results: All vulnerabilities found in the scan
+        severity_filter: Severity levels to include in affected modules
+
+    Returns:
+        Tuple of (module_summary dict, affected_modules list of AffectedModule objects)
+    """
+    from mvn_mcp_server.shared.data_types import AffectedModule
+
+    # Build module summary
+    module_summary = _build_module_summary(all_results)
+
+    # Build affected modules
+    affected_modules_dicts = _build_affected_modules(all_results, severity_filter)
+
+    # Convert dicts to AffectedModule objects for type safety
+    affected_modules = [AffectedModule(**m) for m in affected_modules_dicts]
+
+    return module_summary, affected_modules
+
+
 def _apply_pagination(
     all_results: List[JavaVulnerability], offset: int, max_results: int
 ) -> tuple[List[JavaVulnerability], JavaPaginationInfo]:
@@ -799,7 +828,7 @@ def scan_java_project(
         use_profile_scanning = bool(include_profiles)
 
         if use_profile_scanning:
-            # Use profile-based scanning by directly scanning child POMs
+            # Use profile-based scanning via effective POMs
             logger.info(
                 f"Using profile-based scanning for profiles: {include_profiles}"
             )
@@ -844,15 +873,9 @@ def scan_java_project(
                     )
 
                     # Build module summary and affected modules
-                    module_summary = _build_module_summary(all_results)
-                    affected_modules_dicts = _build_affected_modules(
+                    module_summary, affected_modules = _compile_module_outputs(
                         all_results, severity_filter
                     )
-                    from mvn_mcp_server.shared.data_types import AffectedModule
-
-                    affected_modules = [
-                        AffectedModule(**m) for m in affected_modules_dicts
-                    ]
 
                     # Create scan result with limitation note
                     scan_result = JavaSecurityScanResult(
@@ -902,14 +925,9 @@ def scan_java_project(
             logger.info(f"Returning {len(scan_results)} vulnerabilities (paginated)")
 
             # Build module summary and affected modules
-            module_summary = _build_module_summary(all_results)
-            affected_modules_dicts = _build_affected_modules(
+            module_summary, affected_modules = _compile_module_outputs(
                 all_results, severity_filter
             )
-            # Convert dicts to AffectedModule objects for type safety
-            from mvn_mcp_server.shared.data_types import AffectedModule
-
-            affected_modules = [AffectedModule(**m) for m in affected_modules_dicts]
 
             # Create scan result
             scan_result = JavaSecurityScanResult(
@@ -921,7 +939,7 @@ def scan_java_project(
                 severity_counts=severity_counts,
                 vulnerabilities=scan_results,
                 pagination=pagination_info,
-                scan_limitations=None,
+                scan_limitations=None,  # No limitations for standard workspace scan
                 recommendations=None,
                 maven_available=maven_available,
                 module_summary=module_summary,
