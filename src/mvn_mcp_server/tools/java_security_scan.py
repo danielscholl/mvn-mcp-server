@@ -309,7 +309,7 @@ def _analyze_profile_specificity(
 
     for profile_id, results in profile_results.items():
         for vuln in results["vulnerabilities"]:
-            cve_id = vuln.cve_id if hasattr(vuln, "cve_id") else vuln.get("cve_id", "")
+            cve_id = vuln.cve_id if hasattr(vuln, "cve_id") else ""
             if cve_id:
                 cve_to_profiles[cve_id].add(profile_id)
 

@@ -37,7 +37,11 @@ class MavenEffectivePomService:
             )
 
             if result.returncode == 0:
-                logger.info(f"Maven available: {result.stdout.split()[2]}")
+                try:
+                    maven_version = result.stdout.split()[2]
+                    logger.info(f"Maven available: {maven_version}")
+                except (IndexError, AttributeError):
+                    logger.info("Maven available, but version could not be determined from output.")
                 return True
             else:
                 logger.warning(f"Maven check failed: {result.stderr}")

@@ -6,8 +6,7 @@ for profile-based dependency resolution.
 
 import pytest
 from pathlib import Path
-from unittest.mock import patch, MagicMock, mock_open
-import tempfile
+from unittest.mock import patch, MagicMock
 
 from fastmcp.exceptions import ResourceError
 from mvn_mcp_server.services.maven_effective_pom import MavenEffectivePomService
@@ -145,7 +144,7 @@ class TestEffectivePomGeneration:
         mock_run.return_value = mock_process
 
         # Execute with explicit output file
-        result = MavenEffectivePomService.generate_effective_pom(
+        MavenEffectivePomService.generate_effective_pom(
             mock_workspace, ["azure", "aws"], output_file=output_file
         )
 
