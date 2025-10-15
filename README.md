@@ -40,7 +40,7 @@ AI: ✅ Found 3 critical CVEs, 12 outdated dependencies
 | Category | Capabilities |
 |----------|-------------|
 | **Version Management** | Check single or batch dependency versions • Discover available updates (major/minor/patch) • List version history grouped by tracks |
-| **Security Scanning** | Integrate Trivy vulnerability scanning • CVE detection with severity filtering • Multi-module project support |
+| **Security Scanning** | Integrate Trivy vulnerability scanning • CVE detection with severity filtering • Multi-module project support • Profile-based scanning for multi-cloud deployments |
 | **Enterprise Workflows** | Guided dependency triage analysis • Actionable remediation planning • Complete audit trail with CVE traceability |
 | **AI-Optimized** | Single-call comprehensive responses • Batch operations for efficiency • Intelligent caching |
 
@@ -50,7 +50,8 @@ AI: ✅ Found 3 critical CVEs, 12 outdated dependencies
 
 - [Python 3.12+](https://www.python.org/downloads/)
 - [uv](https://docs.astral.sh/uv/getting-started/installation/)
-- [trivy](https://trivy.dev) (optional)
+- [trivy](https://trivy.dev) (optional, for security scanning)
+- [maven](https://maven.apache.org/install.html) (optional, for profile-based scanning)
 
 
 ### Setup

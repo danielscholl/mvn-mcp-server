@@ -3,6 +3,8 @@
 !.vscode/mcp.json
 !.claude/settings.local.json
 
+other/
+
 # Python-generated files
 __pycache__/
 *.py[oc]

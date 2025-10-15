@@ -1,6 +1,7 @@
 """Java security scanning tool for Maven projects.
 
 This module implements security scanning for Java projects using Trivy.
+Supports profile-based scanning using Maven effective POMs.
 """
 
 import os
@@ -10,6 +11,7 @@ import logging
 import tempfile
 from pathlib import Path
 from typing import Dict, Any, Optional, List
+from collections import defaultdict
 
 from fastmcp.exceptions import ValidationError, ToolError, ResourceError
 
@@ -18,11 +20,14 @@ from mvn_mcp_server.shared.data_types import (
     JavaVulnerability,
     JavaSecurityScanResult,
     JavaPaginationInfo,
+    ProfileScanResult,
+    ProfileSpecificAnalysis,
 )
 from mvn_mcp_server.services.response import (
     format_success_response,
     format_error_response,
 )
+from mvn_mcp_server.services.maven_effective_pom import MavenEffectivePomService
 
 # Set up logging
 logger = logging.getLogger("mvn-mcp-server")
@@ -288,6 +293,181 @@ def _determine_error_code(e: Exception) -> ErrorCode:
         return ErrorCode.INTERNAL_SERVER_ERROR
 
 
+def _analyze_profile_specificity(
+    profile_results: Dict[str, Dict[str, Any]],
+) -> ProfileSpecificAnalysis:
+    """Analyze which vulnerabilities are common vs. profile-specific.
+
+    Args:
+        profile_results: Dict mapping profile_id to scan results
+
+    Returns:
+        ProfileSpecificAnalysis with common and profile-specific CVEs
+    """
+    # Map CVE IDs to the profiles where they appear
+    cve_to_profiles = defaultdict(set)
+
+    for profile_id, results in profile_results.items():
+        for vuln in results["vulnerabilities"]:
+            cve_id = vuln.cve_id if hasattr(vuln, "cve_id") else vuln.get("cve_id", "")
+            if cve_id:
+                cve_to_profiles[cve_id].add(profile_id)
+
+    # Identify CVEs common to all profiles
+    all_profiles = set(profile_results.keys())
+    common_cves = [
+        cve_id
+        for cve_id, profiles in cve_to_profiles.items()
+        if profiles == all_profiles
+    ]
+
+    # Identify profile-specific CVEs (unique to one profile)
+    profile_specific = {}
+    for profile_id in profile_results.keys():
+        specific_cves = [
+            cve_id
+            for cve_id, profiles in cve_to_profiles.items()
+            if profiles == {profile_id}
+        ]
+        if specific_cves:
+            profile_specific[f"{profile_id}_only"] = specific_cves
+
+    return ProfileSpecificAnalysis(
+        common_to_all_profiles=common_cves, profile_specific_cves=profile_specific
+    )
+
+
+def _aggregate_profile_results(
+    profile_results: Dict[str, Dict[str, Any]], max_results: int, offset: int
+) -> Dict[str, Any]:
+    """Aggregate results from multiple profile scans.
+
+    Args:
+        profile_results: Dict mapping profile_id to scan results
+        max_results: Maximum results to return
+        offset: Pagination offset
+
+    Returns:
+        Aggregated scan results with per-profile breakdown
+    """
+    # Combine all vulnerabilities from all profiles
+    all_vulnerabilities = []
+    for profile_id, results in profile_results.items():
+        all_vulnerabilities.extend(results["vulnerabilities"])
+
+    # Calculate aggregated severity counts
+    aggregated_severity_counts = _calculate_severity_counts(all_vulnerabilities)
+
+    # Apply pagination to aggregated results
+    paginated_vulns, pagination_info = _apply_pagination(
+        all_vulnerabilities, offset, max_results
+    )
+
+    # Cross-profile analysis
+    profile_specificity = _analyze_profile_specificity(profile_results)
+
+    # Convert profile results to Pydantic models for response
+    per_profile_pydantic = {}
+    for profile_id, results in profile_results.items():
+        per_profile_pydantic[profile_id] = ProfileScanResult(
+            profile_id=profile_id,
+            effective_pom_used=True,
+            vulnerabilities_found=results["total_vulnerabilities"] > 0,
+            total_vulnerabilities=results["total_vulnerabilities"],
+            severity_counts=results["severity_counts"],
+            vulnerabilities=results["vulnerabilities"],
+        ).model_dump()
+
+    return {
+        "scan_mode": "profile-effective",
+        "vulnerabilities_found": len(all_vulnerabilities) > 0,
+        "total_vulnerabilities": len(all_vulnerabilities),
+        "modules_scanned": list(profile_results.keys()),
+        "profiles_activated": list(profile_results.keys()),
+        "severity_counts": aggregated_severity_counts,
+        "vulnerabilities": paginated_vulns,
+        "pagination": pagination_info,
+        "scan_limitations": None,
+        "recommendations": None,
+        "per_profile_results": per_profile_pydantic,
+        "profile_specific_vulnerabilities": profile_specificity,
+        "maven_available": True,
+    }
+
+
+def _scan_with_profiles(
+    workspace_path: Path,
+    profiles: List[str],
+    severity_filter: List[str],
+    max_results: int,
+    offset: int,
+) -> Dict[str, Any]:
+    """Execute profile-based scanning using Maven effective POMs.
+
+    Args:
+        workspace_path: Path to the Maven project
+        profiles: List of profile IDs to scan
+        severity_filter: Severity levels to include
+        max_results: Maximum results to return
+        offset: Pagination offset
+
+    Returns:
+        Aggregated profile scan results
+
+    Raises:
+        ResourceError: If Maven or Trivy operations fail
+    """
+    logger.info(f"Starting profile-based scanning for profiles: {profiles}")
+
+    # Generate effective POMs for each profile
+    effective_poms = MavenEffectivePomService.generate_effective_poms_for_profiles(
+        workspace_path, profiles
+    )
+
+    try:
+        # Scan each effective POM
+        profile_results = {}
+
+        for profile_id, effective_pom_path in effective_poms.items():
+            logger.info(f"Scanning effective POM for profile: {profile_id}")
+
+            # Run Trivy scan on effective POM
+            trivy_data = _run_trivy_scan(effective_pom_path)
+
+            # Process results
+            vulnerabilities = _process_trivy_results(trivy_data, severity_filter)
+
+            # Tag vulnerabilities with profile
+            for vuln in vulnerabilities:
+                vuln.in_profile = profile_id
+
+            # Calculate severity counts for this profile
+            severity_counts = _calculate_severity_counts(vulnerabilities)
+
+            # Store profile results
+            profile_results[profile_id] = {
+                "vulnerabilities": vulnerabilities,
+                "total_vulnerabilities": len(vulnerabilities),
+                "severity_counts": severity_counts,
+            }
+
+            logger.info(
+                f"Profile {profile_id}: found {len(vulnerabilities)} vulnerabilities"
+            )
+
+        # Aggregate results from all profiles
+        aggregated_results = _aggregate_profile_results(
+            profile_results, max_results, offset
+        )
+
+        return aggregated_results
+
+    finally:
+        # Always cleanup temporary effective POMs
+        MavenEffectivePomService.cleanup_effective_poms(effective_poms)
+        logger.info("Cleaned up temporary effective POM files")
+
+
 def scan_java_project(
     workspace: str,
     include_profiles: Optional[List[str]] = None,
@@ -342,38 +522,73 @@ def scan_java_project(
         logger.info(f"Profiles: {include_profiles}, Severity filter: {severity_filter}")
         logger.info(f"Pagination: offset={offset}, max_results={max_results}")
 
-        # Run Trivy scan
-        trivy_data = _run_trivy_scan(target_path)
+        # Determine if profile-based scanning should be used
+        maven_available = MavenEffectivePomService.check_maven_availability()
+        use_profile_scanning = include_profiles and maven_available
 
-        # Process scan results
-        all_results = _process_trivy_results(trivy_data, severity_filter)
+        if use_profile_scanning:
+            # Use profile-based scanning with effective POMs
+            logger.info(
+                f"Using profile-based scanning for profiles: {include_profiles}"
+            )
+            result_data = _scan_with_profiles(
+                workspace_path, include_profiles, severity_filter, max_results, offset
+            )
 
-        # Calculate severity counts
-        severity_counts = _calculate_severity_counts(all_results)
+            # Create scan result from aggregated data
+            scan_result = JavaSecurityScanResult(**result_data)
 
-        # Apply pagination
-        scan_results, pagination_info = _apply_pagination(
-            all_results, offset, max_results
-        )
+        else:
+            # Use standard workspace scanning
+            if include_profiles and not maven_available:
+                logger.warning(
+                    "Profiles specified but Maven not available - using workspace scan"
+                )
 
-        # Log results
-        total_vulnerabilities = len(all_results)
-        logger.info(f"Found {total_vulnerabilities} vulnerabilities: {severity_counts}")
-        logger.info(f"Returning {len(scan_results)} vulnerabilities (paginated)")
+            # Run Trivy scan
+            trivy_data = _run_trivy_scan(target_path)
 
-        # Create scan result
-        scan_result = JavaSecurityScanResult(
-            scan_mode=scan_mode_desc,
-            vulnerabilities_found=total_vulnerabilities > 0,
-            total_vulnerabilities=total_vulnerabilities,
-            modules_scanned=["."],
-            profiles_activated=include_profiles,
-            severity_counts=severity_counts,
-            vulnerabilities=scan_results,
-            pagination=pagination_info,
-            scan_limitations=None,
-            recommendations=None,
-        )
+            # Process scan results
+            all_results = _process_trivy_results(trivy_data, severity_filter)
+
+            # Calculate severity counts
+            severity_counts = _calculate_severity_counts(all_results)
+
+            # Apply pagination
+            scan_results, pagination_info = _apply_pagination(
+                all_results, offset, max_results
+            )
+
+            # Log results
+            total_vulnerabilities = len(all_results)
+            logger.info(
+                f"Found {total_vulnerabilities} vulnerabilities: {severity_counts}"
+            )
+            logger.info(f"Returning {len(scan_results)} vulnerabilities (paginated)")
+
+            # Add limitation message if profiles were requested but Maven unavailable
+            scan_limitations = None
+            if include_profiles and not maven_available:
+                scan_limitations = [
+                    "Maven not available - scanning workspace without profile resolution",
+                    "Profile-specific dependencies may not be accurately reflected",
+                    "Install Maven for accurate profile-based scanning",
+                ]
+
+            # Create scan result
+            scan_result = JavaSecurityScanResult(
+                scan_mode=scan_mode_desc,
+                vulnerabilities_found=total_vulnerabilities > 0,
+                total_vulnerabilities=total_vulnerabilities,
+                modules_scanned=["."],
+                profiles_activated=include_profiles,
+                severity_counts=severity_counts,
+                vulnerabilities=scan_results,
+                pagination=pagination_info,
+                scan_limitations=scan_limitations,
+                recommendations=None,
+                maven_available=maven_available,
+            )
 
         return format_success_response(tool_name, scan_result.model_dump())
 

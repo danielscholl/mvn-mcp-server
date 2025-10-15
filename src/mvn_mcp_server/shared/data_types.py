@@ -29,6 +29,12 @@ class ErrorCode(str, Enum):
     PROFILE_ERROR = "PROFILE_ERROR"
     MULTI_MODULE_ERROR = "MULTI_MODULE_ERROR"
 
+    # Maven Effective POM Error Codes
+    MAVEN_NOT_AVAILABLE = "MAVEN_NOT_AVAILABLE"
+    MAVEN_EXECUTION_ERROR = "MAVEN_EXECUTION_ERROR"
+    EFFECTIVE_POM_GENERATION_ERROR = "EFFECTIVE_POM_GENERATION_ERROR"
+    PROFILE_NOT_FOUND = "PROFILE_NOT_FOUND"
+
 
 class MavenVersionCheckRequest(BaseModel):
     """Request model for checking Maven version existence."""
@@ -341,11 +347,44 @@ class JavaPaginationInfo(BaseModel):
     has_more: bool = Field(description="Whether more results are available")
 
 
+class ProfileScanResult(BaseModel):
+    """Results for scanning a single Maven profile."""
+
+    profile_id: str = Field(description="Profile identifier")
+    effective_pom_used: bool = Field(
+        description="Whether effective POM was generated for this profile"
+    )
+    vulnerabilities_found: bool = Field(
+        description="Whether vulnerabilities were found in this profile"
+    )
+    total_vulnerabilities: int = Field(
+        description="Total number of vulnerabilities found in this profile"
+    )
+    severity_counts: dict = Field(
+        description="Counts of vulnerabilities by severity level for this profile"
+    )
+    vulnerabilities: List[JavaVulnerability] = Field(
+        description="List of vulnerabilities found in this profile"
+    )
+
+
+class ProfileSpecificAnalysis(BaseModel):
+    """Cross-profile vulnerability analysis."""
+
+    common_to_all_profiles: List[str] = Field(
+        description="CVE IDs present in all scanned profiles", default_factory=list
+    )
+    profile_specific_cves: dict = Field(
+        description="CVE IDs unique to each profile (key: profile_id, value: list of CVE IDs)",
+        default_factory=dict,
+    )
+
+
 class JavaSecurityScanResult(BaseModel):
     """Model for the result of a Java security scan."""
 
     scan_mode: str = Field(
-        description="Scan mode used (trivy, trivy-pom-only, or basic)"
+        description="Scan mode used (trivy, trivy-pom-only, profile-effective, or basic)"
     )
     vulnerabilities_found: bool = Field(
         description="Whether vulnerabilities were found"
@@ -371,4 +410,17 @@ class JavaSecurityScanResult(BaseModel):
     )
     recommendations: Optional[List[str]] = Field(
         default=None, description="Recommendations for improving scan results"
+    )
+    # Profile-based scanning fields
+    per_profile_results: Optional[dict] = Field(
+        default=None,
+        description="Results broken down by profile (key: profile_id, value: ProfileScanResult dict)",
+    )
+    profile_specific_vulnerabilities: Optional[ProfileSpecificAnalysis] = Field(
+        default=None,
+        description="Cross-profile vulnerability analysis showing common vs. profile-specific CVEs",
+    )
+    maven_available: bool = Field(
+        default=False,
+        description="Whether Maven was available for profile-based scanning",
     )
