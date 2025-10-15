@@ -17,6 +17,7 @@ Optimized ADR Index for Agent Context
 | 009 | External Tool Integration Pattern   | acc    | [ADR-009](009-external-tool-integration-pattern.md) |
 | 010 | Dependency Management Strategy      | acc    | [ADR-010](010-dependency-management-strategy.md) |
 | 011 | MCP Prompts Implementation Strategy | acc    | [ADR-011](011-mcp-prompts-implementation.md) |
+| 012 | Maven Profile-Based Security Scanning | acc  | [ADR-012](012-maven-profile-scanning.md) |
 
 ## ADR Records
 
@@ -225,4 +226,27 @@ why: |
 tradeoffs:
 positive: \[complete workflows, enterprise ready, knowledge transfer, audit compliance, simple usage]
 negative: \[complexity, resource management, learning curve]
+```
+
+--------------------------------------------
+```yaml
+id: 012
+title: Maven Profile-Based Security Scanning
+status: accepted
+date: 2025-01-27
+decision: Use mvn help:effective-pom to generate resolved POMs per profile, then scan with Trivy.
+why: |
+• Multi-cloud projects need deployment-specific vulnerability analysis
+• Maven profiles control which dependencies are actually used
+• Effective POMs provide accurate dependency resolution
+• Enable answering "What vulnerabilities affect my Azure deployment?"
+implementation: |
+• Generate effective POM per profile using mvn help:effective-pom -P<profile>
+• Scan each effective POM independently with Trivy
+• Aggregate results with per-profile breakdown
+• Cross-profile analysis identifies common vs unique CVEs
+• Graceful fallback to workspace scan when Maven unavailable
+tradeoffs:
+positive: \[accurate resolution, profile isolation, multi-cloud support, Maven-powered accuracy]
+negative: \[Maven required, ~60s overhead per profile, temp file management]
 ```

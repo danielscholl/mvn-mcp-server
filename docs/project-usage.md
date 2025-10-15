@@ -144,6 +144,47 @@ Scan this Java project for vulnerabilities
 - Trivy must be installed (`brew install trivy` on macOS)
 - Project must contain a `pom.xml` file
 
+#### Profile-Based Scanning
+
+For multi-profile Maven projects (e.g., multi-cloud deployments), scan specific profiles independently to identify deployment-specific vulnerabilities.
+
+**Parameters with profiles**:
+```json
+{
+  "workspace": "/path/to/multi-cloud-project",
+  "include_profiles": ["azure", "aws"],
+  "severity_filter": ["CRITICAL", "HIGH"],
+  "max_results": 100
+}
+```
+
+**Example**:
+```
+Scan my project with the azure profile for critical vulnerabilities
+```
+
+**How it works**:
+1. Generates effective POM for each profile using `mvn help:effective-pom -P<profile>`
+2. Scans each effective POM independently with Trivy
+3. Tags vulnerabilities with their source profile
+4. Performs cross-profile analysis to identify common vs. profile-specific CVEs
+
+**Response includes**:
+- Per-profile vulnerability breakdown
+- Cross-profile analysis (common vs. profile-specific CVEs)
+- Profile-tagged vulnerability details
+- Effective POM usage confirmation
+
+**Additional requirements for profile scanning**:
+- Maven must be installed (`mvn --version` to verify)
+- Profiles must be defined in project's `pom.xml`
+- Falls back to workspace scanning if Maven is unavailable
+
+**Use cases**:
+- **Multi-cloud deployments**: Identify vulnerabilities specific to each cloud provider (AWS vs Azure vs GCP)
+- **Environment isolation**: Compare security posture across dev/staging/prod profiles
+- **Targeted remediation**: Fix profile-specific issues without affecting other deployments
+
 ---
 
 ### Analyze POM File
@@ -465,6 +506,26 @@ For quick vulnerability assessment:
 analyze_pom_file_tool("/path/to/pom.xml", true)
 ```
 No full workspace scan needed.
+
+### Profile-Based Scanning for Multi-Cloud
+
+For multi-cloud or multi-environment projects, compare vulnerabilities across profiles:
+```
+scan_java_project_tool(
+  workspace="/path/to/project",
+  include_profiles=["azure", "aws", "gcp"]
+)
+```
+
+**Pro tip**: The cross-profile analysis will show:
+- CVEs common to all profiles (fix these first)
+- Profile-specific CVEs (deployment-specific issues)
+- Per-profile severity breakdown
+
+This is especially useful for answering:
+- "What vulnerabilities affect my Azure deployment?"
+- "Are there AWS-specific security issues?"
+- "What's the security difference between my cloud providers?"
 
 ---
 
