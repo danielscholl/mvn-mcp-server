@@ -535,7 +535,7 @@ def _aggregate_profile_results(
     profile_results: Dict[str, Dict[str, Any]],
     max_results: int,
     offset: int,
-    severity_filter: List[str],
+    severity_filter: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
     """Aggregate results from multiple profile scans.
 
@@ -543,11 +543,13 @@ def _aggregate_profile_results(
         profile_results: Dict mapping profile_id to scan results
         max_results: Maximum results to return
         offset: Pagination offset
-        severity_filter: Severity levels included in the scan
+        severity_filter: Severity levels included in the scan (default: all levels)
 
     Returns:
         Aggregated scan results with per-profile breakdown
     """
+    if severity_filter is None:
+        severity_filter = ["critical", "high", "medium", "low", "unknown"]
     # Combine all vulnerabilities from all profiles
     all_vulnerabilities = []
     for profile_id, results in profile_results.items():
@@ -607,10 +609,10 @@ def _scan_with_profiles(
     max_results: int,
     offset: int,
 ) -> Dict[str, Any]:
-    """Execute profile-based scanning by directly scanning child POMs.
+    """Execute profile-based scanning using Maven effective POMs.
 
-    This approach scans the child module POMs specified in each profile,
-    which preserves dependency version information needed by Trivy.
+    Generates effective POMs for each profile and scans them with Trivy,
+    which preserves profile-specific dependency version information.
 
     Args:
         workspace_path: Path to the Maven project
@@ -623,7 +625,7 @@ def _scan_with_profiles(
         Aggregated profile scan results
 
     Raises:
-        ResourceError: If Trivy operations fail
+        ResourceError: If Trivy operations fail or Maven is not available
         ValidationError: If parent POM cannot be parsed
     """
     logger.info(f"Starting profile-based scanning for profiles: {profiles}")
@@ -632,74 +634,86 @@ def _scan_with_profiles(
     if not parent_pom.exists():
         raise ValidationError(f"Parent pom.xml not found at {parent_pom}")
 
-    # Scan each profile's modules
+    # Check Maven availability
+    maven_available = MavenEffectivePomService.check_maven_availability()
+    if not maven_available:
+        logger.warning(
+            "Maven not available for profile-based scanning. Cannot generate effective POMs."
+        )
+        raise ResourceError(
+            "Maven is not available. Cannot generate effective POMs for profile-based scanning."
+        )
+
+    # Generate effective POMs for each profile
+    try:
+        effective_poms = MavenEffectivePomService.generate_effective_poms_for_profiles(
+            workspace_path, profiles
+        )
+    except Exception as e:
+        logger.error(f"Failed to generate effective POMs: {str(e)}")
+        raise ResourceError(f"Failed to generate effective POMs: {str(e)}")
+
+    # Scan each profile's effective POM
     profile_results = {}
 
-    for profile_id in profiles:
-        logger.info(f"Processing profile: {profile_id}")
+    try:
+        for profile_id in profiles:
+            logger.info(f"Processing profile: {profile_id}")
 
-        # Extract module paths for this profile
-        module_paths = _extract_module_paths_for_profile(parent_pom, profile_id)
-
-        if not module_paths:
-            logger.warning(f"No modules found for profile '{profile_id}' - skipping")
-            profile_results[profile_id] = {
-                "vulnerabilities": [],
-                "total_vulnerabilities": 0,
-                "severity_counts": _calculate_severity_counts([]),
-            }
-            continue
-
-        # Scan each module's POM
-        profile_vulnerabilities = []
-
-        for module_path in module_paths:
-            module_pom = module_path / "pom.xml"
-
-            if not module_pom.exists():
-                logger.warning(f"Module POM not found: {module_pom}")
+            if profile_id not in effective_poms:
+                logger.warning(f"No effective POM generated for profile '{profile_id}'")
+                profile_results[profile_id] = {
+                    "vulnerabilities": [],
+                    "total_vulnerabilities": 0,
+                    "severity_counts": _calculate_severity_counts([]),
+                }
                 continue
 
-            logger.info(
-                f"Scanning module POM: {module_pom.relative_to(workspace_path)}"
-            )
+            effective_pom_path = effective_poms[profile_id]
+            logger.info(f"Scanning effective POM for profile '{profile_id}': {effective_pom_path}")
 
             try:
-                # Run Trivy scan on child POM
-                trivy_data = _run_trivy_scan(module_pom)
+                # Run Trivy scan on effective POM
+                trivy_data = _run_trivy_scan(effective_pom_path)
 
                 # Process results
                 vulnerabilities = _process_trivy_results(trivy_data, severity_filter)
 
-                # Tag vulnerabilities with profile and module
+                # Tag vulnerabilities with profile
                 for vuln in vulnerabilities:
                     vuln.in_profile = profile_id
-                    vuln.module = module_path.name
-
-                profile_vulnerabilities.extend(vulnerabilities)
 
                 logger.info(
-                    f"Module {module_path.name}: found {len(vulnerabilities)} vulnerabilities"
+                    f"Profile {profile_id}: found {len(vulnerabilities)} vulnerabilities"
                 )
 
+                # Calculate severity counts for this profile
+                severity_counts = _calculate_severity_counts(vulnerabilities)
+
+                # Store profile results
+                profile_results[profile_id] = {
+                    "vulnerabilities": vulnerabilities,
+                    "total_vulnerabilities": len(vulnerabilities),
+                    "severity_counts": severity_counts,
+                }
+
             except Exception as e:
-                logger.error(f"Error scanning module {module_path.name}: {str(e)}")
-                # Continue with other modules even if one fails
+                logger.error(f"Error scanning profile {profile_id}: {str(e)}")
+                # Continue with other profiles even if one fails
+                profile_results[profile_id] = {
+                    "vulnerabilities": [],
+                    "total_vulnerabilities": 0,
+                    "severity_counts": _calculate_severity_counts([]),
+                }
                 continue
 
-        # Calculate severity counts for this profile
-        severity_counts = _calculate_severity_counts(profile_vulnerabilities)
-
-        # Store profile results
-        profile_results[profile_id] = {
-            "vulnerabilities": profile_vulnerabilities,
-            "total_vulnerabilities": len(profile_vulnerabilities),
-            "severity_counts": severity_counts,
-        }
-
-        logger.info(
-            f"Profile {profile_id}: found {len(profile_vulnerabilities)} total vulnerabilities across {len(module_paths)} modules"
-        )
+    finally:
+        # Clean up effective POMs
+        try:
+            MavenEffectivePomService.cleanup_effective_poms()
+            logger.info("Cleaned up effective POM files")
+        except Exception as e:
+            logger.warning(f"Error cleaning up effective POMs: {str(e)}")
 
     # Aggregate results from all profiles
     aggregated_results = _aggregate_profile_results(
@@ -771,12 +785,71 @@ def scan_java_project(
             logger.info(
                 f"Using profile-based scanning for profiles: {include_profiles}"
             )
-            result_data = _scan_with_profiles(
-                workspace_path, include_profiles, severity_filter, max_results, offset
-            )
+            try:
+                result_data = _scan_with_profiles(
+                    workspace_path, include_profiles, severity_filter, max_results, offset
+                )
 
-            # Create scan result from aggregated data
-            scan_result = JavaSecurityScanResult(**result_data)
+                # Create scan result from aggregated data
+                scan_result = JavaSecurityScanResult(**result_data)
+            except ResourceError as e:
+                # If Maven is not available, fall back to workspace scanning
+                # But only for Maven unavailability, not other Maven errors
+                if "not available" in str(e).lower() and "maven" in str(e).lower():
+                    logger.info(
+                        "Maven not available for profile scanning. Falling back to workspace scan."
+                    )
+                    maven_available = False
+
+                    # Run Trivy scan
+                    trivy_data = _run_trivy_scan(target_path)
+
+                    # Process scan results
+                    all_results = _process_trivy_results(trivy_data, severity_filter)
+
+                    # Calculate severity counts
+                    severity_counts = _calculate_severity_counts(all_results)
+
+                    # Apply pagination
+                    scan_results, pagination_info = _apply_pagination(
+                        all_results, offset, max_results
+                    )
+
+                    # Log results
+                    total_vulnerabilities = len(all_results)
+                    logger.info(
+                        f"Found {total_vulnerabilities} vulnerabilities: {severity_counts}"
+                    )
+
+                    # Build module summary and affected modules
+                    module_summary = _build_module_summary(all_results)
+                    affected_modules_dicts = _build_affected_modules(
+                        all_results, severity_filter
+                    )
+                    from mvn_mcp_server.shared.data_types import AffectedModule
+                    affected_modules = [AffectedModule(**m) for m in affected_modules_dicts]
+
+                    # Create scan result with limitation note
+                    scan_result = JavaSecurityScanResult(
+                        scan_mode=scan_mode_desc,
+                        vulnerabilities_found=total_vulnerabilities > 0,
+                        total_vulnerabilities=total_vulnerabilities,
+                        modules_scanned=["."],
+                        profiles_activated=include_profiles,
+                        severity_counts=severity_counts,
+                        vulnerabilities=scan_results,
+                        pagination=pagination_info,
+                        scan_limitations=[
+                            "Maven not available for profile-based scanning - performed workspace scan instead"
+                        ],
+                        recommendations=None,
+                        maven_available=maven_available,
+                        module_summary=module_summary,
+                        affected_modules=affected_modules,
+                        severity_filter_applied=severity_filter,
+                    )
+                else:
+                    raise
 
         else:
             # Use standard workspace scanning
@@ -805,7 +878,10 @@ def scan_java_project(
 
             # Build module summary and affected modules
             module_summary = _build_module_summary(all_results)
-            affected_modules = _build_affected_modules(all_results, severity_filter)
+            affected_modules_dicts = _build_affected_modules(all_results, severity_filter)
+            # Convert dicts to AffectedModule objects for type safety
+            from mvn_mcp_server.shared.data_types import AffectedModule
+            affected_modules = [AffectedModule(**m) for m in affected_modules_dicts]
 
             # Create scan result
             scan_result = JavaSecurityScanResult(
