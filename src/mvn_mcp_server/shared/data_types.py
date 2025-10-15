@@ -4,7 +4,7 @@ This module contains Pydantic models for request validation and response formatt
 """
 
 from enum import Enum
-from typing import List, Optional
+from typing import List, Optional, Dict
 from pydantic import BaseModel, Field, field_validator
 
 
@@ -380,6 +380,46 @@ class ProfileSpecificAnalysis(BaseModel):
     )
 
 
+class ModuleSeverityBreakdown(BaseModel):
+    """Severity breakdown for a single module."""
+
+    critical: int = Field(default=0, description="Number of critical vulnerabilities")
+    high: int = Field(default=0, description="Number of high severity vulnerabilities")
+    medium: int = Field(
+        default=0, description="Number of medium severity vulnerabilities"
+    )
+    low: int = Field(default=0, description="Number of low severity vulnerabilities")
+    unknown: int = Field(
+        default=0, description="Number of unknown severity vulnerabilities"
+    )
+
+
+class ModuleSummary(BaseModel):
+    """Summary of vulnerabilities for a single module."""
+
+    pom_file: str = Field(..., description="Path to the module's POM file")
+    vulnerability_count: int = Field(
+        ..., description="Total vulnerabilities in this module"
+    )
+    severity_breakdown: ModuleSeverityBreakdown = Field(
+        ..., description="Breakdown of vulnerabilities by severity"
+    )
+
+
+class AffectedModule(BaseModel):
+    """Module with vulnerabilities matching the severity filter."""
+
+    module: str = Field(..., description="Module name/path")
+    pom_file: str = Field(..., description="Path to the module's POM file")
+    severity_counts: Dict[str, int] = Field(
+        ..., description="Counts for filtered severities only"
+    )
+    cve_ids: List[str] = Field(..., description="CVE IDs found in this module")
+    vulnerability_count: int = Field(
+        ..., description="Total vulnerabilities matching filter"
+    )
+
+
 class JavaSecurityScanResult(BaseModel):
     """Model for the result of a Java security scan."""
 
@@ -423,4 +463,17 @@ class JavaSecurityScanResult(BaseModel):
     maven_available: bool = Field(
         default=False,
         description="Whether Maven was available for profile-based scanning",
+    )
+    # Module-level summary fields
+    module_summary: Dict[str, ModuleSummary] = Field(
+        default_factory=dict,
+        description="Per-module vulnerability breakdown (key: module_name, value: ModuleSummary)",
+    )
+    affected_modules: List[AffectedModule] = Field(
+        default_factory=list,
+        description="Modules with vulnerabilities matching severity filter, sorted by severity",
+    )
+    severity_filter_applied: List[str] = Field(
+        default_factory=list,
+        description="Severity levels included in this scan",
     )

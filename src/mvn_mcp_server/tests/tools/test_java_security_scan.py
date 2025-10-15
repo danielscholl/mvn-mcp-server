@@ -1008,3 +1008,218 @@ class TestProfileAggregationFunctions:
         assert len(result["result"]["vulnerabilities"]) == 15
         assert result["result"]["pagination"]["has_more"] is True
         assert result["result"]["pagination"]["total_results"] == 20
+
+    def test_affected_modules_sorting(self):
+        """Test that affected modules are sorted by severity and count."""
+        from mvn_mcp_server.tools.java_security_scan import _build_affected_modules
+        from mvn_mcp_server.shared.data_types import JavaVulnerability
+
+        # Create vulnerabilities with different severities in different modules
+        vulns = [
+            # Module A: 2 medium
+            JavaVulnerability(
+                module="module-a",
+                group_id="com.example",
+                artifact_id="lib-a",
+                installed_version="1.0.0",
+                vulnerability_id="CVE-A-1",
+                cve_id="CVE-A-1",
+                severity="medium",
+                description="Test",
+                recommendation="1.1.0",
+                in_profile=None,
+                direct_dependency=True,
+                is_in_bom=False,
+                version_source="direct",
+                source_location="module-a/pom.xml",
+                links=[],
+                fix_available=True,
+            ),
+            JavaVulnerability(
+                module="module-a",
+                group_id="com.example",
+                artifact_id="lib-a2",
+                installed_version="1.0.0",
+                vulnerability_id="CVE-A-2",
+                cve_id="CVE-A-2",
+                severity="medium",
+                description="Test",
+                recommendation="1.1.0",
+                in_profile=None,
+                direct_dependency=True,
+                is_in_bom=False,
+                version_source="direct",
+                source_location="module-a/pom.xml",
+                links=[],
+                fix_available=True,
+            ),
+            # Module B: 1 critical
+            JavaVulnerability(
+                module="module-b",
+                group_id="com.example",
+                artifact_id="lib-b",
+                installed_version="1.0.0",
+                vulnerability_id="CVE-B-1",
+                cve_id="CVE-B-1",
+                severity="critical",
+                description="Test",
+                recommendation="1.1.0",
+                in_profile=None,
+                direct_dependency=True,
+                is_in_bom=False,
+                version_source="direct",
+                source_location="module-b/pom.xml",
+                links=[],
+                fix_available=True,
+            ),
+            # Module C: 3 high
+            JavaVulnerability(
+                module="module-c",
+                group_id="com.example",
+                artifact_id="lib-c1",
+                installed_version="1.0.0",
+                vulnerability_id="CVE-C-1",
+                cve_id="CVE-C-1",
+                severity="high",
+                description="Test",
+                recommendation="1.1.0",
+                in_profile=None,
+                direct_dependency=True,
+                is_in_bom=False,
+                version_source="direct",
+                source_location="module-c/pom.xml",
+                links=[],
+                fix_available=True,
+            ),
+            JavaVulnerability(
+                module="module-c",
+                group_id="com.example",
+                artifact_id="lib-c2",
+                installed_version="1.0.0",
+                vulnerability_id="CVE-C-2",
+                cve_id="CVE-C-2",
+                severity="high",
+                description="Test",
+                recommendation="1.1.0",
+                in_profile=None,
+                direct_dependency=True,
+                is_in_bom=False,
+                version_source="direct",
+                source_location="module-c/pom.xml",
+                links=[],
+                fix_available=True,
+            ),
+            JavaVulnerability(
+                module="module-c",
+                group_id="com.example",
+                artifact_id="lib-c3",
+                installed_version="1.0.0",
+                vulnerability_id="CVE-C-3",
+                cve_id="CVE-C-3",
+                severity="high",
+                description="Test",
+                recommendation="1.1.0",
+                in_profile=None,
+                direct_dependency=True,
+                is_in_bom=False,
+                version_source="direct",
+                source_location="module-c/pom.xml",
+                links=[],
+                fix_available=True,
+            ),
+            # Module D: 1 high (fewer than module C)
+            JavaVulnerability(
+                module="module-d",
+                group_id="com.example",
+                artifact_id="lib-d",
+                installed_version="1.0.0",
+                vulnerability_id="CVE-D-1",
+                cve_id="CVE-D-1",
+                severity="high",
+                description="Test",
+                recommendation="1.1.0",
+                in_profile=None,
+                direct_dependency=True,
+                is_in_bom=False,
+                version_source="direct",
+                source_location="module-d/pom.xml",
+                links=[],
+                fix_available=True,
+            ),
+        ]
+
+        # Build affected modules
+        result = _build_affected_modules(
+            vulns, ["critical", "high", "medium", "low", "unknown"]
+        )
+
+        # Verify sorting: critical first, then high (sorted by count), then medium
+        assert len(result) == 4
+        assert result[0]["module"] == "module-b"  # 1 critical (highest priority)
+        assert result[1]["module"] == "module-c"  # 3 high (more than module-d)
+        assert result[2]["module"] == "module-d"  # 1 high (fewer than module-c)
+        assert result[3]["module"] == "module-a"  # 2 medium (lowest priority)
+
+    def test_namespace_fallback_in_profile_discovery(self, tmp_path):
+        """Test that profile discovery falls back to namespace when needed."""
+        from mvn_mcp_server.tools.java_security_scan import (
+            _extract_module_paths_for_profile,
+        )
+
+        # Create a POM with namespace (standard Maven format)
+        pom_with_namespace = tmp_path / "pom-with-ns.xml"
+        pom_with_namespace.write_text(
+            """<?xml version="1.0"?>
+        <project xmlns="http://maven.apache.org/POM/4.0.0">
+            <groupId>com.example</groupId>
+            <artifactId>test</artifactId>
+            <version>1.0.0</version>
+            <profiles>
+                <profile>
+                    <id>azure</id>
+                    <modules>
+                        <module>azure-module</module>
+                    </modules>
+                </profile>
+            </profiles>
+        </project>"""
+        )
+
+        # Create the module directory
+        azure_module_dir = tmp_path / "azure-module"
+        azure_module_dir.mkdir()
+
+        # Extract module paths - should use namespace fallback
+        modules = _extract_module_paths_for_profile(pom_with_namespace, "azure")
+
+        # Verify the module was found using namespace fallback
+        assert len(modules) == 1
+        assert modules[0] == azure_module_dir
+
+    def test_missing_profile_graceful_handling(self, tmp_path):
+        """Test graceful handling when requested profile doesn't exist."""
+        from mvn_mcp_server.tools.java_security_scan import (
+            _extract_module_paths_for_profile,
+        )
+
+        # Create a POM with only one profile
+        pom_file = tmp_path / "pom.xml"
+        pom_file.write_text(
+            """<?xml version="1.0"?>
+        <project>
+            <groupId>com.example</groupId>
+            <artifactId>test</artifactId>
+            <version>1.0.0</version>
+            <profiles>
+                <profile>
+                    <id>azure</id>
+                </profile>
+            </profiles>
+        </project>"""
+        )
+
+        # Try to extract modules for a non-existent profile
+        modules = _extract_module_paths_for_profile(pom_file, "aws")
+
+        # Should return empty list, not raise an error
+        assert modules == []

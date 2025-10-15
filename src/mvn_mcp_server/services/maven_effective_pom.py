@@ -19,6 +19,9 @@ logger = logging.getLogger("mvn-mcp-server")
 class MavenEffectivePomService:
     """Service for generating effective POMs using Maven."""
 
+    # Class variable to track generated POMs for cleanup
+    _generated_poms: Dict[str, Path] = {}
+
     @staticmethod
     def check_maven_availability() -> bool:
         """Check if Maven is available on the system.
@@ -228,16 +231,25 @@ class MavenEffectivePomService:
             f"{', '.join(effective_poms.keys())}"
         )
 
+        # Store generated POMs for later cleanup
+        MavenEffectivePomService._generated_poms = effective_poms
+
         return effective_poms
 
     @staticmethod
-    def cleanup_effective_poms(effective_poms: Dict[str, Path]) -> None:
+    def cleanup_effective_poms(
+        effective_poms: Optional[Dict[str, Path]] = None,
+    ) -> None:
         """Clean up temporary effective POM files.
 
         Args:
-            effective_poms: Dict mapping profile ID to effective POM path
+            effective_poms: Dict mapping profile ID to effective POM path.
+                          If None, uses stored POMs from generation.
         """
-        for profile, pom_path in effective_poms.items():
+        # Use provided poms or fall back to stored poms
+        poms_to_cleanup = effective_poms or MavenEffectivePomService._generated_poms
+
+        for profile, pom_path in poms_to_cleanup.items():
             try:
                 if pom_path.exists():
                     pom_path.unlink()
@@ -246,3 +258,7 @@ class MavenEffectivePomService:
                     )
             except Exception as e:
                 logger.warning(f"Failed to cleanup effective POM {pom_path}: {str(e)}")
+
+        # Clear the stored POMs after cleanup if no explicit poms were provided
+        if effective_poms is None:
+            MavenEffectivePomService._generated_poms = {}
