@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.2](https://github.com/danielscholl/mvn-mcp-server/compare/v2.2.1...v2.2.2) (2025-10-15)
+
+
+### 🐛 Bug Fixes
+
+* **mcp:** Use Annotated types for list parameters in scan tool ([#32](https://github.com/danielscholl/mvn-mcp-server/issues/32)) ([84b6a2f](https://github.com/danielscholl/mvn-mcp-server/commit/84b6a2f4b943b6eba9c89e86220db41d72c599cc))
+
 ## [2.2.1](https://github.com/danielscholl/mvn-mcp-server/compare/v2.2.0...v2.2.1) (2025-10-15)
 
 
