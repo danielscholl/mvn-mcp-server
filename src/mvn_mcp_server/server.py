@@ -4,7 +4,8 @@ This module creates and configures the FastMCP server instance for the Maven MCP
 """
 
 import logging
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Annotated
+from pydantic import Field
 from fastmcp import FastMCP
 
 # Import the consolidated tools
@@ -234,11 +235,11 @@ def list_available_versions_tool(
 )
 def scan_java_project_tool(
     workspace: str,
-    include_profiles: Optional[List[str]] = None,
+    include_profiles: Annotated[Optional[List[str]], Field(default=None, description="List of Maven profiles to activate")] = None,
     scan_all_modules: bool = True,
     scan_mode: str = "workspace",
     pom_file: Optional[str] = None,
-    severity_filter: Optional[List[str]] = None,
+    severity_filter: Annotated[Optional[List[str]], Field(default=None, description="List of severity levels to include (CRITICAL, HIGH, MEDIUM, LOW)")] = None,
     max_results: int = 100,
     offset: int = 0,
 ):
