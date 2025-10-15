@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.2.0](https://github.com/danielscholl/mvn-mcp-server/compare/v2.1.0...v2.2.0) (2025-10-15)
+
+
+### ✨ Features
+
+* **security:** Implement Maven profile-based security scanning ([#28](https://github.com/danielscholl/mvn-mcp-server/issues/28)) ([d7eb27e](https://github.com/danielscholl/mvn-mcp-server/commit/d7eb27ef4c048492224e03c024f4f31685f395e5))
+
+
+### 🔧 Miscellaneous
+
+* **deps:** Bump astral-sh/setup-uv from 6 to 7 ([#27](https://github.com/danielscholl/mvn-mcp-server/issues/27)) ([b177353](https://github.com/danielscholl/mvn-mcp-server/commit/b1773533adc41e7e50879e5a0ffed17780f85028))
+* **deps:** Bump github/codeql-action from 3 to 4 ([#26](https://github.com/danielscholl/mvn-mcp-server/issues/26)) ([725f88c](https://github.com/danielscholl/mvn-mcp-server/commit/725f88c52cf03e19e25879f37a13d47ec7b01bac))
+
 ## [2.1.0](https://github.com/danielscholl/mvn-mcp-server/compare/v2.0.1...v2.1.0) (2025-10-05)
 
 
