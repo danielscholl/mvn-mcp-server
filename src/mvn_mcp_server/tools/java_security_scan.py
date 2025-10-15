@@ -65,10 +65,11 @@ def _extract_module_paths_for_profile(
         profile_id: Profile ID to extract modules for
 
     Returns:
-        List of Path objects pointing to child module directories
+        List of Path objects pointing to child module directories.
+        Returns empty list if profile is not found or has no valid module paths.
 
     Raises:
-        ValidationError: If parent POM cannot be parsed or profile not found
+        ValidationError: If parent POM cannot be parsed
     """
     try:
         tree = ET.parse(parent_pom_path)
@@ -304,6 +305,26 @@ def _calculate_severity_counts(
     return severity_counts
 
 
+def _extract_module_name_from_pom_path(pom_file: str) -> str:
+    """Extract module name from POM file path.
+
+    Args:
+        pom_file: Path to POM file (e.g., "partition-core-plus/pom.xml")
+
+    Returns:
+        Module name extracted from path
+
+    Examples:
+        "partition-core-plus/pom.xml" -> "partition-core-plus"
+        "provider/partition-azure/pom.xml" -> "provider/partition-azure"
+        "pom.xml" -> "."
+    """
+    module_name = pom_file.replace("/pom.xml", "").replace("pom.xml", ".")
+    if module_name == "":
+        module_name = "."
+    return module_name
+
+
 def _build_module_summary(
     vulnerabilities: List[JavaVulnerability],
 ) -> Dict[str, Any]:
@@ -333,12 +354,7 @@ def _build_module_summary(
         severity_counts = _calculate_severity_counts(vulns)
 
         # Extract module name from POM path
-        # Examples: "partition-core-plus/pom.xml" -> "partition-core-plus"
-        #          "provider/partition-azure/pom.xml" -> "provider/partition-azure"
-        #          "pom.xml" -> "."
-        module_name = pom_file.replace("/pom.xml", "").replace("pom.xml", ".")
-        if module_name == "":
-            module_name = "."
+        module_name = _extract_module_name_from_pom_path(pom_file)
 
         module_summary = ModuleSummary(
             pom_file=pom_file,
@@ -391,9 +407,7 @@ def _build_affected_modules(
         cve_ids = sorted(set(v.cve_id for v in vulns if v.cve_id))
 
         # Extract module name
-        module_name = pom_file.replace("/pom.xml", "").replace("pom.xml", ".")
-        if module_name == "":
-            module_name = "."
+        module_name = _extract_module_name_from_pom_path(pom_file)
 
         affected_module = AffectedModule(
             module=module_name,
@@ -536,6 +550,7 @@ def _aggregate_profile_results(
     max_results: int,
     offset: int,
     severity_filter: Optional[List[str]] = None,
+    maven_available: bool = True,
 ) -> Dict[str, Any]:
     """Aggregate results from multiple profile scans.
 
@@ -544,6 +559,7 @@ def _aggregate_profile_results(
         max_results: Maximum results to return
         offset: Pagination offset
         severity_filter: Severity levels included in the scan (default: all levels)
+        maven_available: Whether Maven was available for profile scanning
 
     Returns:
         Aggregated scan results with per-profile breakdown
@@ -595,7 +611,7 @@ def _aggregate_profile_results(
         "recommendations": None,
         "per_profile_results": per_profile_pydantic,
         "profile_specific_vulnerabilities": profile_specificity,
-        "maven_available": True,
+        "maven_available": maven_available,
         "module_summary": module_summary,
         "affected_modules": affected_modules,
         "severity_filter_applied": severity_filter,
@@ -670,7 +686,9 @@ def _scan_with_profiles(
                 continue
 
             effective_pom_path = effective_poms[profile_id]
-            logger.info(f"Scanning effective POM for profile '{profile_id}': {effective_pom_path}")
+            logger.info(
+                f"Scanning effective POM for profile '{profile_id}': {effective_pom_path}"
+            )
 
             try:
                 # Run Trivy scan on effective POM
@@ -717,7 +735,7 @@ def _scan_with_profiles(
 
     # Aggregate results from all profiles
     aggregated_results = _aggregate_profile_results(
-        profile_results, max_results, offset, severity_filter
+        profile_results, max_results, offset, severity_filter, maven_available
     )
 
     return aggregated_results
@@ -787,7 +805,11 @@ def scan_java_project(
             )
             try:
                 result_data = _scan_with_profiles(
-                    workspace_path, include_profiles, severity_filter, max_results, offset
+                    workspace_path,
+                    include_profiles,
+                    severity_filter,
+                    max_results,
+                    offset,
                 )
 
                 # Create scan result from aggregated data
@@ -827,7 +849,10 @@ def scan_java_project(
                         all_results, severity_filter
                     )
                     from mvn_mcp_server.shared.data_types import AffectedModule
-                    affected_modules = [AffectedModule(**m) for m in affected_modules_dicts]
+
+                    affected_modules = [
+                        AffectedModule(**m) for m in affected_modules_dicts
+                    ]
 
                     # Create scan result with limitation note
                     scan_result = JavaSecurityScanResult(
@@ -878,9 +903,12 @@ def scan_java_project(
 
             # Build module summary and affected modules
             module_summary = _build_module_summary(all_results)
-            affected_modules_dicts = _build_affected_modules(all_results, severity_filter)
+            affected_modules_dicts = _build_affected_modules(
+                all_results, severity_filter
+            )
             # Convert dicts to AffectedModule objects for type safety
             from mvn_mcp_server.shared.data_types import AffectedModule
+
             affected_modules = [AffectedModule(**m) for m in affected_modules_dicts]
 
             # Create scan result

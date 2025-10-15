@@ -237,7 +237,9 @@ class MavenEffectivePomService:
         return effective_poms
 
     @staticmethod
-    def cleanup_effective_poms(effective_poms: Optional[Dict[str, Path]] = None) -> None:
+    def cleanup_effective_poms(
+        effective_poms: Optional[Dict[str, Path]] = None,
+    ) -> None:
         """Clean up temporary effective POM files.
 
         Args:
