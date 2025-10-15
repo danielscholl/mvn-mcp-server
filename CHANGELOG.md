@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.1](https://github.com/danielscholl/mvn-mcp-server/compare/v2.2.0...v2.2.1) (2025-10-15)
+
+
+### 💎 Styles
+
+* **maven:** Format multi-line log message for readability ([#30](https://github.com/danielscholl/mvn-mcp-server/issues/30)) ([ea437aa](https://github.com/danielscholl/mvn-mcp-server/commit/ea437aaa6e0a800c10ead7c5542d2bc2aeff8964))
+
 ## [2.2.0](https://github.com/danielscholl/mvn-mcp-server/compare/v2.1.0...v2.2.0) (2025-10-15)
 
 
